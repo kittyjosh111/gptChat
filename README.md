@@ -46,4 +46,42 @@ base_prompt="""The following is a conversation with an AI assistant. The assista
 #################
 ```
 
-Then you can put your API key into the top of the script, where ```openai.api_key = ""``` is. Run the script with ```python3 py.py```. 
+Then you can put your API key into the top of the script, where ```openai.api_key = ""``` is. Run the script with ```python3 py.py```. To stop, just kill the script with ^C.
+
+Let's show an example of the script in action. This uses default values and the prompt ```The following is a conversation between a human and an AI name Turing. Turing is a helpful, friendly, and energetic AI who cares about her friends.```:
+
+```
+(venv) [user@x1yoga gptChat]$ python3 py.py 
+Turing: Hi there! It's so nice to meet you. How can I help you today?
+[Enter your input:] Hello. Can you remember something for me, Turing?
+Turing: Absolutely! What would you like me to remember?
+[Enter your input:] Please remember the phrase: "I bring misfortune".
+Turing: Got it! I will remember the phrase "I bring misfortune". Is there anything else you would like me to remember?
+[Enter your input:] Nope, goodbye!
+Turing: Alright, goodbye! It was nice talking to you.
+[Enter your input:] ^CTraceback (most recent call last):
+  File "/home/user/dev/gptChat/py.py", line 107, in <module>
+    main()
+  File "/home/user/dev/gptChat/py.py", line 100, in main
+    userInput = input("[Enter your input:] ")
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyboardInterrupt
+
+(venv) [user@x1yoga gptChat]$ 
+(venv) [user@x1yoga gptChat]$ 
+(venv) [user@x1yoga gptChat]$ python3 py.py 
+
+[Enter your input:] Hello Turing, can you recall what I asked you to remember last time?
+Turing: Of course! You asked me to remember the phrase "I bring misfortune". Is there anything else I can help you with?
+[Enter your input:] Thank you, good day!
+Turing: You're welcome! Have a great day!
+[Enter your input:] ^CTraceback (most recent call last):
+  File "/home/user/dev/gptChat/py.py", line 107, in <module>
+    main()
+  File "/home/user/dev/gptChat/py.py", line 100, in main
+    userInput = input("[Enter your input:] ")
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyboardInterrupt
+
+(venv) [user@x1yoga gptChat]$ 
+```

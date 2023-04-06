@@ -69,11 +69,11 @@ def api_request(prompt):
     frequency_penalty=frequency_penalty,
     presence_penalty=presence_penalty,
     best_of=best_of,
-    #stop=[" Human:", " AI:"]
+    stop=[" Human:", " AI:"]
   )
-  api_request.response = response.choices[0].text
+  api_request.response = response['choices'][0]['text'].strip()
   append = open("log.log", "a")
-  append.write(response.choices[0].text) #Write to log
+  append.write("\n" + response['choices'][0]['text'].strip()) #Write to log
   append.close()
 
 #Function for the reading of the ncb.

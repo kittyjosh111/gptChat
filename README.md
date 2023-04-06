@@ -1,4 +1,4 @@
-Some scripts to mimic a chat function using OpenAI's GPT3. Note that you will need an OpenAI API to run this.
+Simple scripts to mimic a chat function using OpenAI's GPT3. Note that you will need an OpenAI API to run this.
 
 This script will create two files: ```neuralcloud.ncb``` and ```log.log```. The ncb file is what serves as the memory for the model, and basically logs the prompt, model output, and user input altogether. The log file only logs the model's outputs. To reset the model "personality", remove the ncb file. It's up to you whether to remove the log or not.
 
@@ -48,6 +48,8 @@ base_prompt="""The following is a conversation with an AI assistant. The assista
 
 Then you can put your API key into the top of the script, where ```openai.api_key = ""``` is. Run the script with ```python3 py.py```. To stop, just kill the script with ^C.
 
+---
+
 Let's show an example of the script in action. This uses default values and the prompt ```The following is a conversation between a human and an AI name Turing. Turing is a helpful, friendly, and energetic AI who cares about her friends.```:
 
 ```
@@ -84,4 +86,23 @@ Turing: You're welcome! Have a great day!
 KeyboardInterrupt
 
 (venv) [user@x1yoga gptChat]$ 
+```
+The errors are when I terminated the script. Notice how information is preserved even after the termination. Let's look at ```neuralcloud.ndb```:
+
+```
+(venv) [user@x1yoga gptChat]$ cat neuralcloud.ncb 
+The following is a conversation between a human and an AI name Turing. Turing is a helpful, friendly, and energetic AI who cares about her friends.
+Human: Hello.
+Turing: Hi there! It's so nice to meet you. How can I help you today?
+Human: Hello. Can you remember something for me, Turing?
+Turing: Absolutely! What would you like me to remember?
+Human: Please remember the phrase: "I bring misfortune".
+Turing: Got it! I will remember the phrase "I bring misfortune". Is there anything else you would like me to remember?
+Human: Nope, goodbye!
+Turing: Alright, goodbye! It was nice talking to you.
+
+Human: Hello Turing, can you recall what I asked you to remember last time?
+Turing: Of course! You asked me to remember the phrase "I bring misfortune". Is there anything else I can help you with?
+Human: Thank you, good day!
+Turing: You're welcome! Have a great day!
 ```

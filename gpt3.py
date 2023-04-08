@@ -4,6 +4,7 @@ openai.api_key = ""
 
 #This is a simple script to converse with OpenAI's GPT models. It tries to keep persistence between chats by creating a file to store logs of the past conversations, here known as neuralcloud.ncb. 
 #Model responses are also written to a log.log for further reference.
+#This model uses the old GPT3 model, which currently is more expensive. Should support GPT4 as well, but haven't checked it yet.
 
 #################
 ### Variables ###
@@ -72,9 +73,9 @@ def api_request(prompt):
     stop=[" Human:", " AI:"]
   )
   api_request.response = response['choices'][0]['text'].strip()
-  append = open("log.log", "a")
-  append.write("\n" + response['choices'][0]['text'].strip()) #Write to log
-  append.close()
+  log = open("log.log", "a")
+  log.write("\n" + response['choices'][0]['text'].strip()) #Write to log
+  log.close()
 
 #Function for the reading of the ncb.
 def read_ncb():
@@ -97,13 +98,11 @@ def main():
 
     #Then have the user interact with the model.
     #Function to ask user for input
-    userInput = input("[Enter your input:] ")
-    append_ncb("\nHuman: " + userInput)
+    user_input = input("[Enter your input:] ")
+    append_ncb("\nHuman: " + user_input)
 
 #################
 #################
 
 if __name__ == "__main__":
     main()
-
-

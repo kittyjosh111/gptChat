@@ -7,6 +7,9 @@ openai.api_key = ""
 #Model responses are also written to a log.log for further reference.
 #This script uses the chat model, or currently the gpt-3.5 model that is similar to ChatGPT.
 
+#counter variable that determines whether to begin with the model or the user. Do not change.
+counter = 0
+
 #################
 ### Variables ###
 
@@ -41,6 +44,7 @@ else:
   memory.append({"role": "system", "content": f"{base_prompt}"}, ) #creating the file with the system prompt
   memory.append({"role": "user", "content": "Hello."}, )
   save_ncb() #So the model's first words are a greeting to the user.
+  counter = 1 #now the model goes first.
 
 #################
 ### Functions ###
@@ -61,12 +65,16 @@ def api_request(prompt):
 #Main function to regulate a question-answer type interaction between user and the model. First load in the past prompts, then move on.
 def main():
   while True:
-    api_request(memory)
-    print(api_request.response)
-    save_ncb()
-
+    global counter
+    if counter == 1:
+      api_request(memory)
+      print(api_request.response)
+      save_ncb()
+    else:
+      pass
     #Then have the user interact with the model.
     #Function to ask user for input
+    counter = 1
     user_input = input("[Enter your input]: ")
     memory.append({"role": "user", "content": f"{user_input}"}, )
 

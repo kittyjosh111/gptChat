@@ -6,6 +6,9 @@ openai.api_key = ""
 #Model responses are also written to a log.log for further reference.
 #This model uses the old GPT3 model, which currently is more expensive. Should support GPT4 as well, but haven't checked it yet.
 
+#counter variable that determines whether to begin with the model or the user. Do not change.
+counter = 0
+
 #################
 ### Variables ###
 
@@ -55,6 +58,7 @@ else:
   append = open("neuralcloud.ncb", "a")
   append.write(base_prompt + "\nHuman: Hello.") #So the model's first words are a greeting to the user.
   append.close()
+  counter = 1 #now the model goes first.
 
 #################
 ### Functions ###
@@ -91,13 +95,17 @@ def append_ncb(append_input):
 #Main function to regulate a question-answer type interaction between user and the model. First load in the past prompts, then move on.
 def main():
   while True:
-    read_ncb()
-    api_request(read_ncb.output)
-    append_ncb("\n" + api_request.response)
-    print(api_request.response)
-
+    global counter
+    if counter == 1:
+      read_ncb()
+      api_request(read_ncb.output)
+      append_ncb("\n" + api_request.response)
+      print(api_request.response)
+    else:
+      pass
     #Then have the user interact with the model.
     #Function to ask user for input
+    counter = 1
     user_input = input("[Enter your input:] ")
     append_ncb("\nHuman: " + user_input)
 

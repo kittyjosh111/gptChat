@@ -34,6 +34,8 @@ Note the neural cloud backup files are not cross-compatible between the two scri
 
 **Also note that I currently do not limit how large the model's ncb is.The longer it is, the more expensive your api requests get, and the model might not give back responses if it hits the maximum token limit. Use at your discretion.**
 
+**The script under enhancedMemory folder attempts to prolong the "life" a script can offer by summarizing past conversations into a brief sentence every 50 or so exhanges of dialogue. Refer there for more information.**
+
 ---
 
 Let's show an example of the script in action. This uses default values and the prompt ```The following is a conversation between a human and an AI name Turing. Turing is a helpful, friendly, and energetic AI who cares about her friends.```. The tracebacks and errors are due to me stopping the script with ^C.

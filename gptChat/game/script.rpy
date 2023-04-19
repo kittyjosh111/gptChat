@@ -44,14 +44,19 @@ label start:
                 toggleChanger.write(text) #By writing something random, we can allow the backend to proceed with its script.
                 toggleChanger.close()
 
-            #begin renpy conditionals    
+            #begin renpy conditionals. Im sure theres a way to get this into python itself, but i cant get it working. so it goes    
             if sentiment == 1:
                 show gpt positive 
             elif sentiment == 2:
                 show gpt negative 
             elif sentiment == 0:
                 show gpt neutral
-            "[text]"
+
+            python: #actual showing dialog.
+                n = 200
+                out=[text[i:i+n] for i in range(0, len(text), n)]
+                for x in range(len(out)):
+                    renpy.say("", out[x])
 
         elif toggle == "input": #If the toggle has content input, then we have renpy ask user for input, so that backend can read off its file later.
             show gpt neutral

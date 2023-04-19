@@ -9,6 +9,9 @@
     # sentiment
 
 #Set renpy defaults
+default preferences.afm_enable = False
+default preferences.desktop_rollback_side = "disable" #disable back button
+default preferences.mobile_rollback_side = "disable" #disable back button
 default true = True
 image gpt neutral = "neutral.png"
 image gpt positive = "positive.png"

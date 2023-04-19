@@ -1,0 +1,70 @@
+﻿# The script of the game goes in this file.
+# Hurr Durr inefficient programming hours!
+
+# This renpy scripts.rpy works hand in hand with backend.py. Make sure that is started first.
+# Required files for integration:
+    # toggle
+    # modelInput
+    # modelOutput
+    # sentiment
+
+#Set renpy defaults
+default true = True
+image gpt neutral = "neutral.png"
+image gpt positive = "positive.png"
+image gpt negative = "negative.png"
+
+# The game starts here. It's really not a game, but just a hacky way to give a GUI to an api.
+label start:
+    scene bg
+    show gpt neutral #base sentiment so we don't start on an empty screen or something
+    while true:
+        python: #This reads off of the toggle file shared between renpy and the backend.py.
+            f = open(renpy.loader.transfn("bridge/toggle"),"r")
+            toggle = f.read()
+
+        if toggle == "output": #If the toggle has content output, then we have renpy fetch the model's latest output and show it.
+            #begin python scripting
+            python:
+                sentAnalysis = open(renpy.loader.transfn("bridge/sentiment"),"r") #This tells renpy to read contents of file sentiment, so it can display character expressions.
+                sentiment = sentAnalysis.read()
+                if "positive" in sentiment.lower(): #positive is set to 1, which will point to positive character image
+                    sentiment = 1
+                elif "negative" in sentiment.lower(): #negative is set to 2, which will point to negative character image
+                    sentiment = 2
+                elif "neutral" in sentiment.lower(): #neutral is 0, which points to neutral character image
+                    sentiment = 0
+                else: #catch-all in case the api does something funky.
+                    sentiment = 0
+
+                modelOutput = open(renpy.loader.transfn("bridge/modelOutput"),"r") #This tells renpy to read contents of file modelOutput, which contains the output of the model.
+                text = modelOutput.read()
+
+                toggleChanger = open(renpy.loader.transfn("bridge/toggle"), "w+")
+                toggleChanger.write(text) #By writing something random, we can allow the backend to proceed with its script.
+                toggleChanger.close()
+
+            #begin renpy conditionals    
+            if sentiment == 1:
+                show gpt positive 
+            elif sentiment == 2:
+                show gpt negative 
+            elif sentiment == 0:
+                show gpt neutral
+            "[text]"
+
+        elif toggle == "input": #If the toggle has content input, then we have renpy ask user for input, so that backend can read off its file later.
+            show gpt neutral
+            python:
+                input = renpy.input("Enter your input: ")
+                modelInput = open(renpy.loader.transfn("bridge/modelInput"), "w+")
+                modelInput.write(input) #this writes the user input to a file cleverly named modelInput
+                modelInput.close()
+                
+                toggleChanger = open(renpy.loader.transfn("bridge/toggle"), "w+")
+                toggleChanger.write(input) #By writing something random, we can allow the backend to proceed with its script.
+                toggleChanger.close()
+
+        else:
+            "Please wait a few seconds for the script to finish generating... Feel free to click to refresh this GUI."
+    return

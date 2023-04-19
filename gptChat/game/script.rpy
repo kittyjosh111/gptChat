@@ -53,7 +53,7 @@ label start:
                 show gpt neutral
 
             python: #actual showing dialog.
-                n = 200
+                n = 200 #consider changing this to look for words, which will have to deal with splitting on spaces or something
                 out=[text[i:i+n] for i in range(0, len(text), n)]
                 for x in range(len(out)):
                     renpy.say("", out[x])
@@ -71,5 +71,5 @@ label start:
                 toggleChanger.close()
 
         else:
-            "Please wait a few seconds for the script to finish generating... Feel free to click to refresh this GUI."
+            pause 0.5 #just keep iterating through this loop until one of the other conditions get triggered.
     return

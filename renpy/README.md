@@ -32,3 +32,7 @@ Cool. So now we have the bridging working. However, there needs to be a way to h
 For ```backend.py```, we can achieve this by looking at the last modified date of ```toggle```. If there hasn't been changes to that file, then it will pause the script, waiting for renpy to finish (user interaction). Then, renpy can **modify ```toggle``` in any way** and this triggers ```backend.py``` to continue with the script. Thus, a simple way for ```backend.py``` to wait for renpy is implemented.
 
 For renpy, we can use ```toggle``` again to have it wait. Since a value of "output" in ```toggle``` tells renpy to display the api response, and a valuie of "input" tells renpy to ask for user input, then having an ```else:``` statement in the script controls whenever this is not the case. Having renpy then sleep creates a loop where renpy won't do antyhing but continuously check whether ```toggle``` finally contains a value of either output or input.
+
+-- 
+
+To run this, look at the releases and **FOLLOW THE INSTRUCTIONS THERE**. Instead if you want to run this version, you'll need the renpy sdk. You'll still have to run the ```backend.py``` first before running the renpy project, refer to the releases insturctions for more infromation.

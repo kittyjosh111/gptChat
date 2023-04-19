@@ -4,41 +4,41 @@
 
 ### Intro:
 
-Simple scripts to mimic a chat function using OpenAI's api and other fun things. Note that you will need an OpenAI API to run this.
+Simple scripts to mimic a chat function using OpenAI's GPT3. Note that you will need an OpenAI API to run this.
 
 I don't know how to code. These are scripts that I've put together with hopefully enough comments that someone who doesn't know what they are doing (me in a few months), will be able to get the gist of what each piece of line does. It's been fun I guess working with the APIs and learning what a list is.
 
-### General Setup:
+There are two scripts provided. The ```gpt3.py``` uses the old GPT3 api for text completion, but is being used to act as a chatbot. It seems to be more expensive than the ```chatGPT.py```, which uses the gpt-3.5-turbo api, thus reducing costs. Use whichever you want.
+
+### Setup:
 
 I recommend running these scripts in a virtual environment. I'll assume you know how to set one up and activate it. If not, refer to the docs: https://docs.python.org/3/library/venv.html
 
-For all scripts, first use pip to install the ```requirements.txt```, then you can open a script in a text editor to tweak the variable values to your liking.
+First use pip to install the ```requirements.txt```, then you can open a script in a text editor to tweak the variable values to your liking.
+
+For ```gpt3.py```, values you can change include temperature, model, prompt, etc. Think about the options you can find on the OpenAI Playground. Those values are here too. Refer to comments within the script for more information.
+
+For ```chatGPT.py```, you can only change the prompt. Oh well.
 
 Then you can put your API key into the top of the script, where ```openai.api_key = ""``` is. Run the script with cli or gui, whichever you know how. To stop, just kill the script with ^C.
 
-Refer to the individual folder READMEs for more specific instructions.
-
 ### Logic behind my scripts:
 
-The basic logic is that the scripts will create two files to store previous conversations. These include a ```neuralcloud.ncb``` (ncb for **n**eural **c**loud **b**ackup) and ```log.log```. The ncb file is what serves as the memory for the model, and basically logs the prompt, model output, and user input altogether. The log file logs the model and user responses in a readeable format. **To reset the model "personality", remove the ncb file and the log file.** This applies to all models.
+Both scripts will create two files to store previous conversations.
 
-Again, refer to each individual README.md for more information.
+For ```gpt3.py```, the script will create a ```neuralcloud.ncb``` (ncb for **n**eural **c**loud **b**ackup) and ```log.log```. The ncb file is what serves as the memory for the model, and basically logs the prompt, model output, and user input altogether. The log file only logs the model's outputs. To reset the model "personality", remove the ncb file. It's up to you whether to remove the log or not.
 
-Note the neural cloud backup files are generally not cross-compatible between the scripts.
+For ```chatGPT.py```, the script will create a ```neuralcloudv2.ncb``` and ```logv2.log```. The ncb file is what serves as the memory for the model, and basically logs the system, user, and assistant contents altogether in a list form. The log file only logs the model's outputs. To reset the model "personality", remove the ncb file. It's up to you whether to remove the log or not.
 
-### Types of scripts:
+Note the neural cloud backup files are not cross-compatible between the two scripts.
 
-The scripts in the folder ```cli``` are the most basic, allowing the user to talk to the api. Note that they do not limit how large the model's ncb is.The longer it is, the more expensive your api requests get, and the model might not give back responses if it hits the maximum token limit. Use at your discretion.
+**Also note that I currently do not limit how large the model's ncb is.The longer it is, the more expensive your api requests get, and the model might not give back responses if it hits the maximum token limit. Use at your discretion.**
 
-The scripts in the folder ```enhancedMemory``` folder go a bit beyond, allowing the user to talk to the api. This script does in fact limit how large the model's ncb is, trying to solve a problem with the scripts in ```cli```. Refer to the README in that folder for more information.
-
-The scripts in the folder ```discord``` use the scripts from ```cli``` and ```enhancedMemory``` to create a discord bot. Information and setup instructions are in the README in that folder.
-
-The ```renpy``` folder is a renpy project. It can be run from the renpy sdk. Its probably easier for you to instead go to the Releases page of this repo and just use those. Please please please read the instructions there.
+**The script under enhancedMemory folder attempts to prolong the "life" a script can offer by summarizing past conversations into a brief sentence every 50 or so exhanges of dialogue. Refer there for more information.**
 
 ---
 
-Let's show an example of the cli scripts in action. This uses default values and the prompt ```The following is a conversation between a human and an AI name Turing. Turing is a helpful, friendly, and energetic AI who cares about her friends.```. The tracebacks and errors are due to me stopping the script with ^C.
+Let's show an example of the script in action. This uses default values and the prompt ```The following is a conversation between a human and an AI name Turing. Turing is a helpful, friendly, and energetic AI who cares about her friends.```. The tracebacks and errors are due to me stopping the script with ^C.
 
 #### gpt3.py:
 ```
@@ -112,10 +112,3 @@ KeyboardInterrupt
 
 (venv) [user@fedora  ]$ 
 ```
----
-
-Now, let's show an example of the renpy application:
-
-![alt text](/screenshots/rpy1.png)
-
-![alt text](/screenshots/rpy2.png)

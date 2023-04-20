@@ -56,10 +56,12 @@ label start:
                 show gpt neutral
 
             python: #actual showing dialog.
-                n = 200 #consider changing this to look for words, which will have to deal with splitting on spaces or something
-                out=[text[i:i+n] for i in range(0, len(text), n)]
+                list=text.split() #this splits the output text into a list of words.
+                n = 40 
+                out=[list[i:i+n] for i in range(0, len(list), n)] #splits lists into smaller lists of n or less words. refer to previous line for n
                 for x in range(len(out)):
-                    renpy.say("", out[x])
+                    string = ' '.join(out[x]) #convert list back to string with space delimiter
+                    renpy.say("", string)
 
         elif toggle == "input": #If the toggle has content input, then we have renpy ask user for input, so that backend can read off its file later.
             show gpt neutral

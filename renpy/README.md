@@ -1,3 +1,27 @@
+# gptChat
+
+---
+
+To run this, look at the releases and **FOLLOW THE INSTRUCTIONS THERE**. Instead if you want to run this version, you'll need the renpy sdk. You'll still have to run the ```backend.py``` first before running the renpy project, refer to the releases insturctions for more infromation.
+
+### Intro:
+
+More complicated script to have renpy act as a gui for the enhancedMemory scripts.
+
+I don't know how to code. Its more painfully obvious in this script. But hey, it works! What else can I say?
+
+The renpy script that I wrote is all in ```scripts.rpy```. The rest of the base renpy files are unchanged, save for ```screens.rpy```, where I tried to disable some of the buttons such as save, load, back, etc. The bridge folder contains a modified version of the ```enhancedMemory``` script so that it may interface with renpy.
+
+### Setup:
+
+I recommend running these scripts in a virtual environment. I'll assume you know how to set one up and activate it. If not, refer to the docs: https://docs.python.org/3/library/venv.html
+
+I also assume you have seen the other versions of this script and know that you need pip to install openai or other modules. 
+
+Then, navigate to the ```game/bridge``` folder and find the ```backend.py```. Most importantly, put in your openAI key. Less importantly, you can change the frequency at which renpy will cut the model output to fit it all in the dialog box, and this is found near the end of ```scripts.rpy``` in ```game/```.
+
+## Logic:
+
 Ok so, this is an interesting script in that I know its really inefficient and redundant, but it seems to work for what it was designed for. Unfortunately, this also means I will forget the pathways I built to get this working. It also means its going to be really troublesome for someone to read the code and know what I'm doing. So while the memory is still fresh, lets try explaining this again.
 
 Renpy is not pure python. That means I can't really stick my entire gpt script from my repo into renpy and have it work. What I thought then was to run the gpt script as a "backend" or server for renpy to read off of. The files shared between renpy and this ```backend.py``` thus have to be somewhere accessible. Thus, ```backend.py``` and the files it generates ```neuralcloud_renpy.ncb``` ```log_renpy.log``` are found in the folder ```game/bridge```. 
@@ -34,5 +58,6 @@ For ```backend.py```, we can achieve this by looking at the last modified date o
 For renpy, we can use ```toggle``` again to have it wait. Since a value of "output" in ```toggle``` tells renpy to display the api response, and a valuie of "input" tells renpy to ask for user input, then having an ```else:``` statement in the script controls whenever this is not the case. Having renpy then sleep creates a loop where renpy won't do antyhing but continuously check whether ```toggle``` finally contains a value of either output or input.
 
 -- 
-
-To run this, look at the releases and **FOLLOW THE INSTRUCTIONS THERE**. Instead if you want to run this version, you'll need the renpy sdk. You'll still have to run the ```backend.py``` first before running the renpy project, refer to the releases insturctions for more infromation.
+![alt text](/screenshots/flowchart.png)
+Thanks bio1AL for convincing me of the usefulness of flowcharts
+--

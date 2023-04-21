@@ -20,17 +20,19 @@ Refer to the individual folder READMEs for more specific instructions.
 
 ### Types of scripts:
 
+Refer to the folder names for the scripts described here.
+
 - ```cli```: The most basic scripts in that they were created first. These scripts allow the user to talk to the api through cli. It is the most simple without any fun features, so do note that they **do not limit how large the model's ncb is**.The longer it is, the **more expensive your api requests get**, and the model might not give back responses if it hits the maximum token limit. Use at your discretion. There is a script for the GPT3 api, and another that uses the gpt3.5 api. Refer to their readmes in the folder.
 
--```enhancedMemory```: The second generation of scripts and also the base for all the other later scripts. The scripts in this folder go a bit beyond, allowing the user to talk to the api but now does in fact **limit how large the model's ncb** is, trying to solve the problem with the scripts in ```cli```. Bascially, the ncb is compressed every certain number of dialog exchanges. Refer to the README in that folder for more information.
+- ```enhancedMemory```: The second generation of scripts and also the base for all the other later scripts. The scripts in this folder go a bit beyond, allowing the user to talk to the api but now does in fact **limit how large the model's ncb** is, trying to solve the problem with the scripts in ```cli```. Bascially, the ncb is compressed every certain number of dialog exchanges. Refer to the README in that folder for more information.
 
--```discord```: The scripts in this folder use the scripts from ```cli``` and ```enhancedMemory``` to create a discord bot. Information and setup instructions are in the README in that folder.
+- ```discord```: The scripts in this folder use the scripts from ```cli``` and ```enhancedMemory``` to create a discord bot. Information and setup instructions are in the README in that folder.
 
--```renpy```: This folder is a renpy project. It can be run from the renpy sdk. If you just want to run this, it is probably easier for you to instead go to the Releases page of this repo and just use those. Please please please read the instructions there. **run ```backend.py``` first before the renpy launcher```
+- ```renpy```: This folder is a renpy project. It can be run from the renpy sdk. If you just want to run this, it is probably easier for you to instead go to the Releases page of this repo and just use those. Please please please read the instructions there. **run ```backend.py``` first before the renpy launcher```
 
 ### Logic behind my scripts:
 
-The basic logic is that the scripts is that they query the api for a response based off os some sort of input. To retain "memory", these scripts will create two files to store previous conversations. This include a ```neuralcloud.ncb``` (ncb for **n**eural **c**loud **b**ackup) and ```log.log```. The ncb file is what serves as the memory for the model, and basically logs the prompt, model output, and user input altogether. The log file logs the model and user responses in a readeable format. **To reset the model "personality", remove the ncb file and the log file.** This applies to all models.
+The basic logic is that the scripts is that they query the api for a response based off of some sort of input. To retain "memory", these scripts will create two files to store previous conversations. This include a ```neuralcloud.ncb``` (ncb for **n**eural **c**loud **b**ackup) and ```log.log```. The ncb file is what serves as the memory for the model, and basically logs the prompt, model output, and user input altogether. The log file logs the model and user responses in a readeable format. **To reset the model "personality", remove the ncb file and the log file.** This applies to all models.
 
 Again, refer to each individual README.md for more information.
 

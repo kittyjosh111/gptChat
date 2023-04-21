@@ -6,7 +6,7 @@
 
 Simple scripts to mimic a chat function using OpenAI's api and other fun things. Note that you will need an OpenAI API to run this.
 
-I don't know how to code. These are scripts that I've put together with hopefully enough comments that someone who doesn't know what they are doing (me in a few months), will be able to get the gist of what each piece of line does. It's been fun I guess working with the APIs and learning what a list is.
+I don't know how to code. I do however know how to read and use a search engine. These are scripts that I've written from scratch and put together with hopefully enough comments that someone who doesn't know what they are doing (me in a few months), will be able to get the gist of what each piece of line does. It's been fun I guess working with the APIs and learning what a list is.
 
 ### General Setup:
 

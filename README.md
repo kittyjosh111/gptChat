@@ -12,29 +12,29 @@ I don't know how to code. These are scripts that I've put together with hopefull
 
 I recommend running these scripts in a virtual environment. I'll assume you know how to set one up and activate it. If not, refer to the docs: https://docs.python.org/3/library/venv.html
 
-For all scripts, first use pip to install the ```requirements.txt```, then you can open a script in a text editor to tweak the variable values to your liking.
+For all scripts, first use pip to install the ```requirements.txt```, then you can open a script in a text editor to tweak the variable values to your liking. Usually, that ends up being the api key, as well as temperature, prompt, delimiters, etc.
 
 Then you can put your API key into the top of the script, where ```openai.api_key = ""``` is. Run the script with cli or gui, whichever you know how. To stop, just kill the script with ^C.
 
 Refer to the individual folder READMEs for more specific instructions.
 
+### Types of scripts:
+
+- ```cli```: The most basic scripts in that they were created first. These scripts allow the user to talk to the api through cli. It is the most simple without any fun features, so do note that they **do not limit how large the model's ncb is**.The longer it is, the **more expensive your api requests get**, and the model might not give back responses if it hits the maximum token limit. Use at your discretion. There is a script for the GPT3 api, and another that uses the gpt3.5 api. Refer to their readmes in the folder.
+
+-```enhancedMemory```: The second generation of scripts and also the base for all the other later scripts. The scripts in this folder go a bit beyond, allowing the user to talk to the api but now does in fact **limit how large the model's ncb** is, trying to solve the problem with the scripts in ```cli```. Bascially, the ncb is compressed every certain number of dialog exchanges. Refer to the README in that folder for more information.
+
+-```discord```: The scripts in this folder use the scripts from ```cli``` and ```enhancedMemory``` to create a discord bot. Information and setup instructions are in the README in that folder.
+
+-```renpy```: This folder is a renpy project. It can be run from the renpy sdk. If you just want to run this, it is probably easier for you to instead go to the Releases page of this repo and just use those. Please please please read the instructions there. **run ```backend.py``` first before the renpy launcher```
+
 ### Logic behind my scripts:
 
-The basic logic is that the scripts will create two files to store previous conversations. These include a ```neuralcloud.ncb``` (ncb for **n**eural **c**loud **b**ackup) and ```log.log```. The ncb file is what serves as the memory for the model, and basically logs the prompt, model output, and user input altogether. The log file logs the model and user responses in a readeable format. **To reset the model "personality", remove the ncb file and the log file.** This applies to all models.
+The basic logic is that the scripts is that they query the api for a response based off os some sort of input. To retain "memory", these scripts will create two files to store previous conversations. This include a ```neuralcloud.ncb``` (ncb for **n**eural **c**loud **b**ackup) and ```log.log```. The ncb file is what serves as the memory for the model, and basically logs the prompt, model output, and user input altogether. The log file logs the model and user responses in a readeable format. **To reset the model "personality", remove the ncb file and the log file.** This applies to all models.
 
 Again, refer to each individual README.md for more information.
 
 Note the neural cloud backup files are generally not cross-compatible between the scripts.
-
-### Types of scripts:
-
-The scripts in the folder ```cli``` are the most basic, allowing the user to talk to the api. Note that they do not limit how large the model's ncb is.The longer it is, the more expensive your api requests get, and the model might not give back responses if it hits the maximum token limit. Use at your discretion.
-
-The scripts in the folder ```enhancedMemory``` folder go a bit beyond, allowing the user to talk to the api. This script does in fact limit how large the model's ncb is, trying to solve a problem with the scripts in ```cli```. Refer to the README in that folder for more information.
-
-The scripts in the folder ```discord``` use the scripts from ```cli``` and ```enhancedMemory``` to create a discord bot. Information and setup instructions are in the README in that folder.
-
-The ```renpy``` folder is a renpy project. It can be run from the renpy sdk. Its probably easier for you to instead go to the Releases page of this repo and just use those. Please please please read the instructions there.
 
 ---
 

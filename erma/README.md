@@ -26,7 +26,7 @@ For example, say the chatbot and user had a conversation about favorite foods th
 ### Setup
 ```erma.py``` is the main script. You are advised to run it in a virtual environment. Remember to ```pip install -r requirements.txt```
 
-The script is currently meant to be run in an interactive mode. You can look at the last two lines for a hint on how to start up the chatbot.
+The script is currently meant to be run in an interactive mode: ```python3 -i erma.py```. You can look at the last few lines for a hint on how to start up the chatbot.
 
 First, you should copy ```.env.example``` to ```.env``` and edit ```OPENAI_API_KEY``` to include your OpenAI api key in the string. If you want to use the discord integration (more on that later), then fill out ```DISCORD_API_KEY``` as well.
 
@@ -50,7 +50,7 @@ Again, refer to the last two lines of ```erma.py``` as an example way to start t
 
 ### Integrations
 
-I am planning to write more integrations for ```erma.py```. You can too. Since you can run ```erma.py``` with ```bridge_active=True``` and have the chatbot wait for ```user_file``` to be populated, as well as write the API response to ```ai_file```, then you can write your own script to watch for changes to said files and send their contents off to some other service. I have an example ```discord-erma.py``` in this repository that does exactly that. Two functions from ```erma.py``` that could be useful for this are as follows:
+I am planning to write more integrations for ```erma.py```. You can too. Since you can run ```erma.py``` with ```bridge_active=True``` and have the chatbot wait for ```user_file``` to be populated, as well as write the API response to ```ai_file```, then you can write your own script to watch for changes to said files and send their contents off to some other service. I have an example ```discord-erma.py``` in the ```integrations``` folder that does exactly that. Two functions from ```erma.py``` that could be useful for this are as follows:
 
 ```
 def  wait_modified(filename):
@@ -70,7 +70,7 @@ def  string_save(filename, input):
 		file.write(input)
 ```
 
-You can import these from ```erma``` when writing your own script.
+You can import these from ```erma``` when writing your own script. Make sure you copy the integration/bridge script into the same folder as ```erma.py```.
 
 ---
 

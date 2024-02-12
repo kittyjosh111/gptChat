@@ -225,6 +225,7 @@ def start(model, bridge_active=False):
     print(f'{ai_name}: ' + memory['convo'][-1]['content'] + '\n') #api
   return take_turns(model=model, convo=convo, ai_name=ai_name, filename=ncb, bridge_active=bridge_active)('user') #ignition, starts a loop of user, api, user, api, etc...
 
-## Initiate the script. Modify as needed ###
+## Initiate the script. Modify as needed. ##
 #ncb, ai_file, user_file = "neuralcloud_backup.ncb", 'neuralcloud_ai.file', 'neuralcloud_user.file'
-#start('gpt-3.5-turbo-0125', bridge_active=True)
+#start('gpt-3.5-turbo-0125', bridge_active=True) #bridge is active for bridging to discord-erma
+#start('gpt-3.5-turbo-0125') #bridge is not active, and only prints to local console

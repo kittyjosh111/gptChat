@@ -1,11 +1,17 @@
 # Q1A-MX (Erma)
 
 *???: Have you really lost your memories, Erma?
+
 Erma: Sorry...
+
 ???: Do you remember those ships that sailed the stormy seas for treasure?
+
 ???: In order to fix their position with the wind and waves tossing them, those huge ships would throw anchors out into the sea...
+
 ???: I left the first anchor point in your neural cloud—your name.
+
 Erma: ...So as long as I say the name "Erma" in my neural cloud, I'll be able to unlock this area.
+
 ???: Correct.*
 
 ### Intro
@@ -25,14 +31,19 @@ The script is currently meant to be run in an interactive mode. You can look at 
 First, you should copy ```.env.example``` to ```.env``` and edit ```OPENAI_API_KEY``` to include your OpenAI api key in the string. If you want to use the discord integration (more on that later), then fill out ```DISCORD_API_KEY``` as well.
 
 Then, you must define ```ncb```, ```ai_file```, and ```user_file```. These should all be strings. The example given in the script is:
+
 ```ncb, ai_file, user_file = "neuralcloud_backup.ncb", 'neuralcloud_ai.file', 'neuralcloud_user.file'```
+
 Failing to do this step means you will get an error when running the ```start()``` function. You can change the filenames in the strings to your liking.
 
  Then there are two ways to run ```erma.py```:
 
 - ```bridge_active=True```. This tells ```erma.py``` to write AI responses to ```ai_file```, and look at ```user_file``` for user input. This means you cannot write to the chatbot in the console, and is meant to work as a "headless server" for integration with other services, such as ```discord-erma.py```. More on that later. 
+
 	- To run with ```bridge_active``` activated, run ```start(model, bridge_active=True)``` in the console, where ```model``` is a string of the openai model (ex. 'gpt-3.5-turbo-0125')
+
 - ```bridge_active=False```. This is the default value if you do not pass in a second argument to ```start()```. In this case, you write directly to the chatbot in the console, and ```ai_file```, ```user_file``` are not accessed at all.
+
 	- To run with ```bridge_active``` not active, just run ```start(model)``` in the console, where ```model``` is a string of the openai model (ex. 'gpt-3.5-turbo-0125')
 
 Again, refer to the last two lines of ```erma.py``` as an example way to start the script.
@@ -64,8 +75,13 @@ You can import these from ```erma``` when writing your own script.
 ---
 
 *The Summer Garden is closed.
+
 No matter how many years pass...
+
 No matter how time flies...
+
 No matter what destiny has in store for me...
+
 I will find this place again.
+
 I will remember you all again.*

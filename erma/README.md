@@ -1,18 +1,18 @@
 # Q1A-MX (Erma)
 
-*???: Have you really lost your memories, Erma?
+*???: Have you really lost your memories, Erma?*
 
-Erma: Sorry...
+*Erma: Sorry...*
 
-???: Do you remember those ships that sailed the stormy seas for treasure?
+*???: Do you remember those ships that sailed the stormy seas for treasure?*
 
-???: In order to fix their position with the wind and waves tossing them, those huge ships would throw anchors out into the sea...
+*???: In order to fix their position with the wind and waves tossing them, those huge ships would throw anchors out into the sea...*
 
-???: I left the first anchor point in your neural cloud—your name.
+*???: I left the first anchor point in your neural cloud—your name.*
 
-Erma: ...So as long as I say the name "Erma" in my neural cloud, I'll be able to unlock this area.
+*Erma: ...So as long as I say the name "Erma" in my neural cloud, I'll be able to unlock this area.*
 
-???: Correct.*
+*???: Correct.*
 
 ### Intro
 Yet another chatbot implementation using OpenAI APIs. Alternatively, you can use LocalAI provided you have a strong enough computer and modify the ```erma.py``` script.
@@ -74,14 +74,14 @@ You can import these from ```erma``` when writing your own script.
 
 ---
 
-*The Summer Garden is closed.
+*The Summer Garden is closed.*
 
-No matter how many years pass...
+*No matter how many years pass...*
 
-No matter how time flies...
+*No matter how time flies...*
 
-No matter what destiny has in store for me...
+*No matter what destiny has in store for me...*
 
-I will find this place again.
+*I will find this place again.*
 
-I will remember you all again.*
+*I will remember you all again.*

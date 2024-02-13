@@ -124,6 +124,8 @@ def summarize(model, ai_name, filename, convo, bridge_active, key=None):
   This saves token counts in the long run. Takes in AI_NAME, FILENAME, CONVO,
   and KEY (the key in the summer garden dict in a list"""
   print('> Neural Cloud compacting in progress. Please wait.')
+  if bridge_active:
+    string_save('summarize', "") #if bridge activated, create a temp summarize file to tell the integration to wait for user input
   messages='' #first create a blanked string
   memory=dict_read(filename) #load in the entire memory to do stuff to
   system_prompt=memory['convo'][0]['content'] #get the old system prompt
@@ -140,6 +142,7 @@ def summarize(model, ai_name, filename, convo, bridge_active, key=None):
     garden[key]=request #update the summer garden dict
     save(garden, 'garden', filename) #now save it to FILENAME
   print('> Neural Cloud compacting finished. You may continue the conversation.\n')
+  os.remove('summarize') #remove no matter what
   return take_turns(model, convo, ai_name, filename, bridge_active)('user') #let AI do the summarization in background. That means user gets control next
 
 def take_turns(model, convo, ai_name, filename, bridge_active=None):

@@ -26,6 +26,9 @@ def start(discord_bot_token, triggers, ai_file, user_file):
         if message.author.bot: return
         for i in range(len(triggers)):
             if triggers[i].lower() in message.content.lower():
+                while os.path.isfile('summarize')
+                  print('Erma is currently summarizing. Waiting 2.0 seconds for completion..."
+                  time.sleep(2.0)
                 print('User input received!')
                 string_save(user_file, message.content) #write to USER_FILE, triggers ERMA to continue
                 response = wait_modified(ai_file) #then wait for AI_FILE to be written by ERMA

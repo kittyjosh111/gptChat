@@ -148,11 +148,7 @@ def take_turns(model, convo, ai_name, filename, bridge_active=None):
     """Figure out whether to have the user or the AI given some result
     WHO should be the string 'api' or 'user' """
     if len(dict_read(filename)['convo']) >= 32: #change to a suitable number
-      if bridge_active:
-        string_save('summarizing', "") #create a blank file named summarizing.tmp
       summarize(model, ai_name, filename, convo, bridge_active) #then summarize without saving to garden
-      if os.path.exists('summarizing'):
-        os.remove('summarizing') #delete the file if created
     if who == "api":
       response, convo = check_garden(api_request(model, convo), filename, convo) #run a request, but first CHECK_GARDEN
       convo.append({'role': 'assistant', 'content': f'{response}'}, ) #append the return of API_REQUEST

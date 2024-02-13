@@ -27,7 +27,11 @@ def start(discord_bot_token, triggers, ai_file, user_file):
         for i in range(len(triggers)):
             if triggers[i].lower() in message.content.lower():
                 print('User input received!')
-                string_save(user_file, message.content) #write to USER_FILE, triggers ERMA to continue
+                while os.path.exists('summarizing'):
+                  print('Chatbot is summarizing. Waiting 2.0 seconds...')
+                  time.sleep(2.0)
+                else:
+                  string_save(user_file, message.content) #write to USER_FILE, triggers ERMA to continue
                 response = wait_modified(ai_file) #then wait for AI_FILE to be written by ERMA
                 print('AI response sent!')
                 await message.channel.send(response)

@@ -160,6 +160,7 @@ def take_turns(model, convo, ai_name, filename, bridge_active=None):
       print(f'{ai_name}: ' + response + '\n') #print to console
       if bridge_active:
         bridge(ai_file, user_file)(ai_text=response)
+        string_save(user_file, "") #finally, blank out the user_file again.
       return take_turns(model, convo, ai_name, filename, bridge_active)('user') #returns control back to user for their turn
     elif who == "user":
       def get_user_input(user_file=None):
@@ -192,7 +193,6 @@ def take_turns(model, convo, ai_name, filename, bridge_active=None):
       user_input, convo = check_garden(command_check(get_user_input(toggle)), filename, convo)
       convo.append({'role': 'user', 'content': f'{user_input}'}, )
       #we don't save to file here. For example, if the person you're talking to doesnt hear you, they wont remember what you said
-      string_save(user_file, "") #finally, blank out the user_file again.
       return take_turns(model, convo, ai_name, filename, bridge_active)('api') #now return control back to the AI for their turn
     else:
       return '> Error. take_turns not called with correct inner function argument.'

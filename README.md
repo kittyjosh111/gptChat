@@ -4,7 +4,7 @@
 
 Simple scripts to mimic a chat function using OpenAI's api and other fun things. Note that you will need an OpenAI API to run this. 
 
-Alternatively, refer to the LocalAI documentation and you could have these scripts point to LocalAI instead of OpenAI with minor modifications.
+Alternatively, if you have a local LLM backend that uses an OpenAI-compatible API (Ollama, LocalAI), then you can refer to their documentation to find out what minor tweaks you need in order to use these scripts with local LLM models.
 
 ### General Setup:
 

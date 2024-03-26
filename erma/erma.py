@@ -142,7 +142,8 @@ def summarize(model, ai_name, filename, convo, bridge_active, key=None):
     garden[key]=request #update the summer garden dict
     save(garden, 'garden', filename) #now save it to FILENAME
   print('> Neural Cloud compacting finished. You may continue the conversation.\n')
-  os.remove('summarize') #remove no matter what
+  if bridge_active: #summarize file only exists if BRIDGE_ACTIVE was in fact active
+    os.remove('summarize') #remove the temp file
   return take_turns(model, convo, ai_name, filename, bridge_active)('user') #let AI do the summarization in background. That means user gets control next
 
 def take_turns(model, convo, ai_name, filename, bridge_active=None):

@@ -26,7 +26,7 @@ For example, say the chatbot and user had a conversation about favorite foods th
 ### Setup
 ```erma.py``` is the main script. You are advised to run it in a virtual environment. Remember to ```pip install -r requirements.txt```
 
-The script is currently meant to be run in an interactive mode: ```python3 -i erma.py```. You can look at the last few lines for a hint on how to start up the chatbot.
+**This script is currently meant to be run in an interactive mode: ```python3 -i erma.py```.** This will put you into the console. You can look at the last few lines for a hint on how to use the start function. **Uncommenting these lines can lead to issues with integration scripts. Use them as a reference about what command to run in the interactive sesssion.**
 
 First, you should copy ```.env.example``` to ```.env``` and edit ```OPENAI_API_KEY``` to include your OpenAI api key in the string. If you want to use the discord integration (more on that later), then fill out ```DISCORD_API_KEY``` as well.
 

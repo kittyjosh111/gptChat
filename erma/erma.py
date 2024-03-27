@@ -4,7 +4,7 @@ Another implementation of the OpenAI API to create a simple chatbot.
 - This chatbot can be assigned a name, AI_NAME.
 - Upon creation, a system prompt is assigned to SYSTEM_PROMPT.
 - Messages later passed to the api request usually are assigned to CONVO, which is a *list of dicts*.
-    The first dict is the SYSTEM_PROMPT. 
+    The first dict is the SYSTEM_PROMPT.
     Later entries are dicts of KEY assistant/user and VALUE message.
     An example is shown below:
       {

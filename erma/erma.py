@@ -119,7 +119,7 @@ def check_garden(input, filename, convo):
   save(convo, 'convo', filename) #now save the convo
   return input, convo #return the INPUT and the CONVO
 
-def summarize(model, ai_name, filename, convo, bridge_active, key=None):
+def summarize(model, ai_name, filename, convo, bridge_active, key=None, local_summary=False):
   """Function to summarize and compact the current Neural Cloud
   This saves token counts in the long run. Takes in AI_NAME, FILENAME, CONVO,
   and KEY (the key in the summer garden dict in a list"""
@@ -134,7 +134,14 @@ def summarize(model, ai_name, filename, convo, bridge_active, key=None):
     if role == 'assistant': #convert all 'assistant' to AI_NAME
       role=ai_name #reassign ROLE so that it prints the AI_NAME later
     messages=messages + f'\n{role}: {content}' #next, we have to prefix MESSAGES with SYSTEM_PROMPT and make this the new system prompt to api_turn
-    request=api_request(model, [{'role': 'system', 'content': 'You are a helpful AI that summarizes conversations.'}, {'role': 'user', 'content': f'You are {ai_name}. As {ai_name}, summarize the following from your point of view in less than 3 sentences. {messages}'}])
+    if not local_summary: #default is to use the api for summarization
+      request=api_request(model, [{'role': 'system', 'content': 'You are a helpful AI that summarizes conversations.'}, {'role': 'user', 'content': f'You are {ai_name}. As {ai_name}, summarize the following from your point of view in less than 3 sentences. {messages}'}])
+    else: #but we can run that locally
+      from transformers import pipeline, logging #we use hugginface transformers locally
+      logging.set_verbosity_error() #surpress messages from pipeline
+      print('> Running summarizer locally.')
+      pipe = pipeline("summarization", model=local_summary)
+      request=pipe(messages, do_sample=False)[0]['summary_text'] #extract text after running
   convo=[{'role': 'system', 'content': f'{system_prompt}'}, {'role': 'assistant', 'content': f'{request}'}, ] #create a new convo prompt with everything
   save(convo, 'convo', filename) #now save the new convo
   if key: #now we do operations to update the summer garden
@@ -144,15 +151,15 @@ def summarize(model, ai_name, filename, convo, bridge_active, key=None):
   print('> Neural Cloud compacting finished. You may continue the conversation.\n')
   if bridge_active: #summarize file only exists if BRIDGE_ACTIVE was in fact active
     os.remove('summarize') #remove the temp file
-  return take_turns(model, convo, ai_name, filename, bridge_active)('user') #let AI do the summarization in background. That means user gets control next
+  return take_turns(model, convo, ai_name, filename, bridge_active, local_summary)('user') #let AI do the summarization in background. That means user gets control next
 
-def take_turns(model, convo, ai_name, filename, bridge_active=None):
+def take_turns(model, convo, ai_name, filename, bridge_active=None, local_summary=False):
   """Higher order function that does things"""
   def inner(who, convo=convo, bridge_active=bridge_active):
     """Figure out whether to have the user or the AI given some result
     WHO should be the string 'api' or 'user' """
     if len(dict_read(filename)['convo']) >= 32: #change to a suitable number
-      summarize(model, ai_name, filename, convo, bridge_active) #then summarize without saving to garden
+      summarize(model, ai_name, filename, convo, bridge_active, local_summary=local_summary) #then summarize without saving to garden
     if who == "api":
       response, convo = check_garden(api_request(model, convo), filename, convo) #run a request, but first CHECK_GARDEN
       convo.append({'role': 'assistant', 'content': f'{response}'}, ) #append the return of API_REQUEST
@@ -161,7 +168,7 @@ def take_turns(model, convo, ai_name, filename, bridge_active=None):
       if bridge_active:
         bridge(ai_file, user_file)(ai_text=response)
         string_save(user_file, "") #finally, blank out the user_file again.
-      return take_turns(model, convo, ai_name, filename, bridge_active)('user') #returns control back to user for their turn
+      return take_turns(model, convo, ai_name, filename, bridge_active, local_summary)('user') #returns control back to user for their turn
     elif who == "user":
       def get_user_input(user_file=None):
         """Function to get input from a user or an external file"""
@@ -174,14 +181,14 @@ def take_turns(model, convo, ai_name, filename, bridge_active=None):
         def action(input_command):
           """Takes in an INPUT function to run, then restarts take_turns with the user arg"""
           input_command #run the input command first
-          return take_turns(model, convo, ai_name, filename, bridge_active)('user') #then rerun with user in control
+          return take_turns(model, convo, ai_name, filename, bridge_active, local_summary)('user') #then rerun with user in control
         if user_input == 'exit()':
           action(exit('> Program Terminated.')) #exits entire program with message
         elif user_input == 'clear()':
           action(os.system('cls' if os.name == 'nt' else 'clear')) #clear the console
         elif user_input == 'summarize()':
           inp=input('> Enter a key to save a summary of the current memory into the summer garden. Leave blank in order to summarize without saving to the summer garden.\n> Key: ')
-          action(summarize(model, ai_name, filename, convo, bridge_active, inp)) #input passed in, write to the summer garden
+          action(summarize(model, ai_name, filename, convo, bridge_active, inp, local_summary)) #input passed in, write to the summer garden
         elif user_input == 'help()':
           action(print('> These are the available commands. Type them without the quotation marks.\n>  "exit()": Exits the session.\n>  "clear()": Clears the console.\n>  "summarize()": Manually compact the neural cloud by summarizing past conversations.\n'))
         else:
@@ -193,16 +200,18 @@ def take_turns(model, convo, ai_name, filename, bridge_active=None):
       user_input, convo = check_garden(command_check(get_user_input(toggle)), filename, convo)
       convo.append({'role': 'user', 'content': f'{user_input}'}, )
       #we don't save to file here. For example, if the person you're talking to doesnt hear you, they wont remember what you said
-      return take_turns(model, convo, ai_name, filename, bridge_active)('api') #now return control back to the AI for their turn
+      return take_turns(model, convo, ai_name, filename, bridge_active, local_summary)('api') #now return control back to the AI for their turn
     else:
       return '> Error. take_turns not called with correct inner function argument.'
   return inner
 
-def start(model, bridge_active=False):
-  """Function to start the script. Takes in the openai MODEL (string), and BRIDGE_ACTIVE (bool).
+def start(model, bridge_active=False, local_summary=False):
+  """Function to start the script. Takes in the openai MODEL (string), BRIDGE_ACTIVE (bool), and LOCAL_SUMMARY (string).
   NCB, AI_FILE, and USER_FILE should be defined in the Global Frame first.
   It then attempts to read the NCB and load in the past conversations + garden.
-  If BRIDGE_ACTIVE is not False, then it creates the files AI_FILE and USER_FILE."""
+  If BRIDGE_ACTIVE is not False, then it creates the files AI_FILE and USER_FILE.
+  If LOCAL_SUMMARY is not False, it should be the string of the summarizer model from Hugging Face to use.
+  Otherwise, the summarizer feature is given to the MODEL to do."""
   if os.path.isfile(ncb): #make sure that the ncb is created
     print('> Neural Cloud backup file found. Loading contents...')
     memory=dict_read(ncb) #memory set!
@@ -213,7 +222,7 @@ def start(model, bridge_active=False):
     print('> Neural Cloud Backup not found. Creating...')
     ai_name=input('> What name would you like to assign to the AI? (This is what you will call the AI)\n> ')
     system_prompt=input('> Provide a system prompt for the AI. (This is akin to the personality or baseline traits for the AI)\n> ')
-    convo=[{'role': 'system', 'content': f'{system_prompt} Your name is {ai_name}'}, ]
+    convo=[{'role': 'system', 'content': f'{system_prompt} Your name is {ai_name}.'}, ]
     memory={'ai_name': ai_name, 'convo': convo, 'garden': {}} #memory set!
     dict_write(ncb, memory, 'w') #w indicates overwrite the file
     print(f'> Neural Cloud for {ai_name} created.')
@@ -227,9 +236,10 @@ def start(model, bridge_active=False):
   if len(memory['convo']) >= 4: #system_prompt, summary, user, api makes 4 total items in the list. Only if we have this count can we give a sensible past convo
     print('User: ' + memory['convo'][-2]['content']) #user
     print(f'{ai_name}: ' + memory['convo'][-1]['content'] + '\n') #api
-  return take_turns(model=model, convo=convo, ai_name=ai_name, filename=ncb, bridge_active=bridge_active)('user') #ignition, starts a loop of user, api, user, api, etc...
+  return take_turns(model=model, convo=convo, ai_name=ai_name, filename=ncb, bridge_active=bridge_active, local_summary=local_summary)('user') #ignition, starts a loop of user, api, user, api, etc...
 
 ## Initiate the script. Modify as needed. ##
 #ncb, ai_file, user_file = "neuralcloud_backup.ncb", 'neuralcloud_ai.file', 'neuralcloud_user.file'
 #start('gpt-3.5-turbo-0125', bridge_active=True) #bridge is active for bridging to discord-erma
 #start('gpt-3.5-turbo-0125') #bridge is not active, and only prints to local console
+#start('gpt-3.5-turbo-0125', local_summary="philschmid/flan-t5-base-samsum") #bridge is not active, and summarization is done locally using the speicifed model.

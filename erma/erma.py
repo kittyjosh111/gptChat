@@ -134,14 +134,14 @@ def summarize(model, ai_name, filename, convo, bridge_active, key=None, local_su
     if role == 'assistant': #convert all 'assistant' to AI_NAME
       role=ai_name #reassign ROLE so that it prints the AI_NAME later
     messages=messages + f'\n{role}: {content}' #next, we have to prefix MESSAGES with SYSTEM_PROMPT and make this the new system prompt to api_turn
-    if not local_summary: #default is to use the api for summarization
-      request=api_request(model, [{'role': 'system', 'content': 'You are a helpful AI that summarizes conversations.'}, {'role': 'user', 'content': f'You are {ai_name}. As {ai_name}, summarize the following from your point of view in less than 3 sentences. {messages}'}])
-    else: #but we can run that locally
-      from transformers import pipeline, logging #we use hugginface transformers locally
-      logging.set_verbosity_error() #surpress messages from pipeline
-      print('> Running summarizer locally.')
-      pipe = pipeline("summarization", model=local_summary)
-      request=pipe(messages, do_sample=False)[0]['summary_text'] #extract text after running
+  if not local_summary: #default is to use the api for summarization
+    request=api_request(model, [{'role': 'system', 'content': 'You are a helpful AI that summarizes conversations.'}, {'role': 'user', 'content': f'You are {ai_name}. As {ai_name}, summarize the following from your point of view in less than 3 sentences. {messages}'}])
+  else: #but we can run that locally
+    from transformers import pipeline, logging #we use hugginface transformers locally
+    logging.set_verbosity_error() #surpress messages from pipeline
+    print('> Running summarizer locally.')
+    pipe = pipeline("summarization", model=local_summary)
+    request=pipe(messages, do_sample=False)[0]['summary_text'] #extract text after running
   convo=[{'role': 'system', 'content': f'{system_prompt}'}, {'role': 'assistant', 'content': f'{request}'}, ] #create a new convo prompt with everything
   save(convo, 'convo', filename) #now save the new convo
   if key: #now we do operations to update the summer garden

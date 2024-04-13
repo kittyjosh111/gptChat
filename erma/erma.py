@@ -44,6 +44,8 @@ Another implementation of the OpenAI API to create a simple chatbot.
 import os
 import time
 import json
+import re
+import shutil
 from openai import OpenAI
 from dotenv import load_dotenv
 
@@ -124,6 +126,7 @@ def summarize(model, ai_name, filename, convo, bridge_active, key=None, local_su
   This saves token counts in the long run. Takes in AI_NAME, FILENAME, CONVO,
   and KEY (the key in the summer garden dict in a list"""
   print('> Neural Cloud compacting in progress. Please wait.')
+  shutil.copy(ncb, 'backup.ncb.bk') #make a copy of the neural cloud in case we need to restore it
   if bridge_active:
     string_save('summarize', "") #if bridge activated, create a temp summarize file to tell the integration to wait for user input
   messages='' #first create a blanked string
@@ -145,6 +148,7 @@ def summarize(model, ai_name, filename, convo, bridge_active, key=None, local_su
   convo=[{'role': 'system', 'content': f'{system_prompt}'}, {'role': 'assistant', 'content': f'{request}'}, ] #create a new convo prompt with everything
   save(convo, 'convo', filename) #now save the new convo
   if key: #now we do operations to update the summer garden
+    print(f'> Saving to Summer Garden under the key: {key}.')
     garden=memory['garden'] #get the summer garden list
     garden[key]=request #update the summer garden dict
     save(garden, 'garden', filename) #now save it to FILENAME
@@ -182,15 +186,24 @@ def take_turns(model, convo, ai_name, filename, bridge_active=None, local_summar
           """Takes in an INPUT function to run, then restarts take_turns with the user arg"""
           input_command #run the input command first
           return take_turns(model, convo, ai_name, filename, bridge_active, local_summary)('user') #then rerun with user in control
+        def matcher(regex1, regex2):
+          """Function that tries to match USER_INPUT against a provided REGEX1.
+          If there is a match, run the second REGEX2.
+          Returns False if REGEX1 fails, otherwise returns output from REGEX2"""
+          matches = re.findall(regex1, user_input)
+          if matches: #there were any returns, then take first one only
+            contents = re.findall(regex2, matches[0]) #get the contents inside the parantheses
+            return contents[0]
+          else:
+            return False
         if user_input == 'exit()':
           action(exit('> Program Terminated.')) #exits entire program with message
         elif user_input == 'clear()':
           action(os.system('cls' if os.name == 'nt' else 'clear')) #clear the console
-        elif user_input == 'summarize()':
-          inp=input('> Enter a key to save a summary of the current memory into the summer garden. Leave blank in order to summarize without saving to the summer garden.\n> Key: ')
-          action(summarize(model, ai_name, filename, convo, bridge_active, inp, local_summary)) #input passed in, write to the summer garden
         elif user_input == 'help()':
-          action(print('> These are the available commands. Type them without the quotation marks.\n>  "exit()": Exits the session.\n>  "clear()": Clears the console.\n>  "summarize()": Manually compact the neural cloud by summarizing past conversations.\n'))
+          action(print('> These are the available commands. Type them without the quotation marks.\n>  "exit()": Exits the session.\n>  "clear()": Clears the console.\n>  "summarize()": Manually compact the neural cloud by summarizing past conversations. To save to the summer garden, put the key which you want to save to inside the parantheses. For example, summarize(key).\n'))
+        elif (match_expression := matcher(r'summarize\([^)]*\)', r'\((.*?)\)')) is not False: #regex1 is summarize(*), regex2 is (*)
+          action(summarize(model, ai_name, filename, convo, bridge_active, match_expression, local_summary)) #input passed in, write to the summer garden
         else:
           return user_input #if no commands found, just return user_input for further processing
       if bridge_active: #then see whether to look for a user_file or have the input
@@ -239,7 +252,7 @@ def start(model, bridge_active=False, local_summary=False):
   return take_turns(model=model, convo=convo, ai_name=ai_name, filename=ncb, bridge_active=bridge_active, local_summary=local_summary)('user') #ignition, starts a loop of user, api, user, api, etc...
 
 ## Initiate the script. Modify as needed. ##
-#ncb, ai_file, user_file = "neuralcloud_backup.ncb", 'neuralcloud_ai.file', 'neuralcloud_user.file'
+#ncb, ai_file, user_file = "neuralcloud_backup.ncb", 'neuralcloud_ai.file', 'neuralcloud_user.file' #you MUST define these variables
 #start('gpt-3.5-turbo-0125', bridge_active=True) #bridge is active for bridging to discord-erma
 #start('gpt-3.5-turbo-0125') #bridge is not active, and only prints to local console
 #start('gpt-3.5-turbo-0125', local_summary="philschmid/flan-t5-base-samsum") #bridge is not active, and summarization is done locally using the speicifed model.

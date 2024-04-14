@@ -59,7 +59,7 @@ init python: #renpy's way of initializing python stuff for later use
         If that time changes, it means FILENAME was edited, and we return its new contents."""
         last_modified = os.path.getmtime(filename)
         while last_modified == os.path.getmtime(filename):
-            renpy.pause(1) #we call renpy's pause because the OS thinks the program is hanging when using time.sleep
+            renpy.pause(2.0) #we call renpy's pause because the OS thinks the program is hanging when using time.sleep
         return string_read(filename) #then read FILENAME content
 
     def splitter(text, split):
@@ -86,17 +86,11 @@ default preferences.mobile_rollback_side = "disable" #disable back button
 label start:
     scene bg #this loads in the bg.* file in the images directory
     show gpt neutral #base sentiment
-    python:
-        #and now, tell user some instructions.
-        renpy.say("NOTICE", "Please make sure that 'erma.py' and 'sentiment.py' are not running. If they are, turn them off now. Once they have been turned off, you may click the text box to proceed.")
-        string_save(ai_file, "") #blank them out so renpy doesnt crash later
-        string_save(user_file, "")
-        renpy.say("NOTICE", "You may now start 'erma.py' and 'sentiment.py'. Click the text box once they are running.")
     # These display lines of dialogue. - Ren'Py
     # Nuh uh! Infinite loops! - me
-    while True:
+    while True: #to do: make a more foolproof check for summarize
         if exists('summarize'):
-            $ renpy.say("NOTICE", "Neural Cloud compacting in progress. Please wait.")
+            $ renpy.say("NOTICE", "Neural Cloud compacting in progress. Please wait. To continue, click this text box.")
             while exists('summarize'): #if we see the summarize file, that means the model is summarizing.
                 pause 2 #just keep iterating through this loop
             $ renpy.say("NOTICE", "Neural Cloud compacting finished. You may click the text box to continue the conversation.")
@@ -105,10 +99,7 @@ label start:
                 user_input = renpy.input("Enter your input: ")
                 string_save(user_file, user_input) #write renpy's input
             else: #must be AI turn then
-                def wait_splitter(text, split):
-                    """Function to call SPLITTER() on TEXT and SPLIT once
-                    SENTIMENT has been modified"""
-                    text_out = text #I expect TEXT to be a function. We should get its return val
+                if sentiment: #allows the user to choose whether to have the sentiment analysis features
                     sent_out = wait_modified(sentiment) #this one definitely is a function return
                     if 'positive' in sent_out:
                         renpy.show('positive') #self-explanatory
@@ -117,11 +108,9 @@ label start:
                     else: #neutral and other edge cases depending on the sentiment pipeline
                         renpy.show('neutral')
                     string_save(sentiment, "") #blank this out
-                    return splitter(text_out, split) #run the actual splitting function
-                if sentiment: #allows the user to choose whether to have the sentiment analysis features
-                    wait_splitter(wait_modified(ai_file), 32) #run with sentiment wait
                 else:
-                    splitter(wait_modified(ai_file), 32) #run without sentiment wait
+                    wait_modified(ai_file)
+                splitter(string_read(ai_file), 42) #then we display whats here
         pause 0.5 #necessary in order not to completely burn out the cpu
     #This ends the game. We shouldn't ever reach here.
     return

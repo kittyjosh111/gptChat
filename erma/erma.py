@@ -155,6 +155,7 @@ def summarize(model, ai_name, filename, convo, bridge_active, key=None, local_su
   print('> Neural Cloud compacting finished. You may continue the conversation.\n')
   if bridge_active: #summarize file only exists if BRIDGE_ACTIVE was in fact active
     os.remove('summarize') #remove the temp file
+    string_save(user_file, "") #and blank out user_file for the next round
   return take_turns(model, convo, ai_name, filename, bridge_active, local_summary)('user') #let AI do the summarization in background. That means user gets control next
 
 def take_turns(model, convo, ai_name, filename, bridge_active=None, local_summary=False):

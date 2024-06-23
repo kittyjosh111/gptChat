@@ -57,7 +57,6 @@ init python: #renpy's way of initializing python stuff for later use
         while last_modified == os.path.getmtime(filename):
             renpy.pause(pause_length) #we call renpy's pause because the OS thinks the program is hanging when using time.sleep
         os.chdir(cwd)
-        print("DEBUG:   File has been modified.")
         return ren_read(filename) #then read FILENAME content
 
     def splitter(text, split):
@@ -97,11 +96,10 @@ label start:
         #   this means either the AI is making its response, or
         #   the summarizer feature is on and currently summarizing.
         while True:
-            print("DEBUG: Main Loop Started...")
             if ren_read(ai_file) != "": #if the AI_FILE is not blank, that means the AI has written to it: the AI response can be displayed
-                print("DEBUG:   Entered AI Turn...")
+                print("DEBUG: Entered AI Turn...")
                 if renpy.loadable('sentiment', 'erma'): #if sentiment.py is active, it created a sentiment file. Thus we look for sentiments
-                    print("DEBUG:   Waiting for sentiment analysis...")
+                    print("DEBUG: Waiting for sentiment analysis...")
                     sent_out = wait_modified('sentiment') #this one definitely is a function return
                     if 'positive' in sent_out:
                         renpy.show('positive') #self-explanatory
@@ -110,20 +108,22 @@ label start:
                     else: #neutral and other edge cases depending on the sentiment pipeline
                         renpy.show('neutral')
                     string_save('sentiment', "") #blank this out for next time
-                    print("DEBUG:   Sentiment analysis completed...")
+                    print("DEBUG: Sentiment analysis completed...")
                 splitter(ren_read(ai_file), 36) #then we display whats here
                 string_save(ai_file, "") #and blank it out to "reset" Ren'Py's view of AI_FILE
             elif ren_read(user_file) == "": #USER_FILE will be blanked by erma once AI output is written
-                print("DEBUG:   Entered USER turn...")
+                print("DEBUG: Entered USER turn...")
                 user_input = renpy.input("Enter your input: ")
                 string_save(user_file, user_input) #write renpy's input
             else:
-                print("DEBUG:   Ambiguous case. This usually means that the AI is busy creating summarizing or creating an output. Waiting before retrying...")
                 os.chdir('game') #We now should check if erma is summarizing. I cannot for whatever reason rely on renpy.loadable here.
                 os.chdir('erma') #Thus, I rely on pure python to tell me whether the summarize file exists.
                 while os.path.isfile('summarize'): #we can always rely on OS to check whether 'summarize' is inside the erma folder
+                    print("DEBUG: Summarization active...")
                     renpy.say("NOTICE", "Neural Cloud compacting in progress. Please wait for it to finish.", interact=False) #if so, we send this out
                     renpy.pause(pause_length)
+                else:
+                    print("DEBUG: Ambiguous case. This usually means that the AI is busy creating summarizing or creating an output. Waiting before retrying...")
                 os.chdir(cwd) #if not, then we reset the working python directory.
                 renpy.pause(pause_length) #We wait a bit, also as to not burn out the CPUs.
     #This ends the game. We shouldn't ever reach here.

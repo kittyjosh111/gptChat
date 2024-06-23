@@ -6,8 +6,13 @@ to a file named "sentiment", for use in Ren'Py scripts.rpy"""
 
 import os
 import time
-from erma import string_save
 from transformers import pipeline #its huggingface time
+
+def string_save(filename, input):
+  """Function to save a string to a file.
+  Takes in an INPUT (string), and overwrites to FILENAME (string)"""
+  with open(filename, "w") as file:
+    file.write(input)
 
 def start(model, ai_file):
     string_save("sentiment", "") #create (or blank) out this file

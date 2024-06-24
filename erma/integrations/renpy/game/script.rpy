@@ -12,6 +12,7 @@ init python: #renpy's way of initializing python stuff for later use
 
     import os
     import time
+    import launcher_services
 
     #First define these vars. Change them as necessary. Refer to erma.py.
     ai_file = "neuralcloud_ai.file"
@@ -26,6 +27,7 @@ init python: #renpy's way of initializing python stuff for later use
     #Then the functions. These are variations of the functions from erma.py.
 
     cwd = os.getcwd() #get the current executive dir so we can come back later
+    ren_pid = os.getpid() #get the PID of this process to kill it later during quit
 
     def string_save(filename, input):
         """Function to save a string to a file.
@@ -72,6 +74,20 @@ init python: #renpy's way of initializing python stuff for later use
 default preferences.afm_enable = False
 default preferences.desktop_rollback_side = "disable" #disable back button
 default preferences.mobile_rollback_side = "disable" #disable back button
+
+#splashscreen
+#This runs erma and sentiment in background
+label splashscreen:
+    scene black
+    show text "Loading internal backend scripts..."
+    python:
+        os.chdir('game')
+        os.chdir('erma')
+        launcher_services.start() #this just runs the start function from that file, which launches both scripts in processes
+        os.chdir(cwd)
+    with Pause(5)
+    hide text
+    return
 
 #The game starts here.
 label start:
@@ -128,3 +144,7 @@ label start:
                 renpy.pause(pause_length) #We wait a bit, also as to not burn out the CPUs.
     #This ends the game. We shouldn't ever reach here.
     return
+
+label quit:
+    $ print("Exiting project and killing backends...")
+    $ os.killpg(os.getpid(), 9)

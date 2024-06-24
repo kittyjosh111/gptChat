@@ -16,7 +16,7 @@ def string_save(filename, input):
 
 def start(model, ai_file):
     string_save("sentiment", "") #create (or blank) out this file
-    print("DEBUG: sentiment cleared. waiting for ai input...")
+    print("[sentiment.py] DEBUG: sentiment cleared. waiting for ai input...")
     while True: #infinite loop
         last_modified=os.path.getmtime(ai_file)
         while last_modified == os.path.getmtime(ai_file):
@@ -25,10 +25,10 @@ def start(model, ai_file):
             with open(ai_file, "r") as read:
                 ai_text = read.read().rstrip()
             if ai_text: #make sure its not blank
-                print("DEBUG: ai input found:", ai_text)
+                print("[sentiment.py] DEBUG: ai input found:", ai_text)
                 sentiment_pipeline = pipeline(model=model) #load the model
                 eval_sentiment = sentiment_pipeline([ai_text])[0]['label'] #run it, extract sentiment
-                print("DEBUG: sentiment:", eval_sentiment)
+                print("[sentiment.py] DEBUG: sentiment:", eval_sentiment)
                 time.sleep(2.0) #sometimes, we write it just too fast that scripts.rpy fails to log the original time
                 string_save("sentiment", eval_sentiment) #write to file
 

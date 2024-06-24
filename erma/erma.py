@@ -163,8 +163,6 @@ def take_turns(model, convo, ai_name, filename, bridge_active=None, local_summar
   def inner(who, convo=convo, bridge_active=bridge_active):
     """Figure out whether to have the user or the AI given some result
     WHO should be the string 'api' or 'user' """
-    if len(dict_read(filename)['convo']) >= 32: #change to a suitable number
-      summarize(model, ai_name, filename, convo, bridge_active, local_summary=local_summary) #then summarize without saving to garden
     if who == "api":
       response, convo = check_garden(api_request(model, convo), filename, convo) #run a request, but first CHECK_GARDEN
       convo.append({'role': 'assistant', 'content': f'{response}'}, ) #append the return of API_REQUEST
@@ -172,9 +170,11 @@ def take_turns(model, convo, ai_name, filename, bridge_active=None, local_summar
       print(f'{ai_name}: ' + response + '\n') #print to console
       if bridge_active:
         bridge(ai_file, user_file)(ai_text=response)
-        string_save(user_file, "") #finally, blank out the user_file again.
       return take_turns(model, convo, ai_name, filename, bridge_active, local_summary)('user') #returns control back to user for their turn
     elif who == "user":
+      if len(dict_read(filename)['convo']) >= 32: #change to a suitable number
+        summarize(model, ai_name, filename, convo, bridge_active, local_summary=local_summary) #then summarize without saving to garden
+      string_save(user_file, "") #finally, blank out the user_file again.
       def get_user_input(user_file=None):
         """Function to get input from a user or an external file"""
         if user_file:

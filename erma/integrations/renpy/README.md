@@ -21,7 +21,7 @@ Ren'Py bridging services for ```erma.py```
 
 7. Move the contents of the folder EXCEPT integrations/ from the above step into game/erma/ inside your Ren'Py project.
 
-8. Take a moment to look at your Ren'Py project folder. Inside the game/erma/ folder, you should see the following required files: ```erma.py```, ```sentiment.py```, ```launcher_services.py```, and ```requirements.txt```. Other files are optional. You SHOULD NOT have the integrations folder in here.
+8. Take a moment to look at your Ren'Py project folder. First look for ```launcher_services.py``` and ```script.rpy``` in the game/ folder. Now, inside the game/erma/ folder, you should see the following required files: ```erma.py```, ```sentiment.py```, and ```requirements.txt```. Other files are optional. You SHOULD NOT have the integrations folder in here.
 
 9. Take a moment to edit ```erma.py```. First, replace the line: ```client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))``` with this instead: ```client = OpenAI(base_url = 'http://localhost:11434/v1', api_key='ollama')```. If hosting the ollama server elsewhere, tweak base_url to your needs.
 
@@ -41,7 +41,7 @@ Ren'Py bridging services for ```erma.py```
 
 17. If you want, place a background image in the same folder and title it ```bg```. The file extension does not matter.
 
-## Setting up backends with sentiment analysis
+## Setting up backends with or without sentiment analysis
 
 1. In a terminal window or however you usually run python files, activate the venv you created in step 12 from the installation.
 

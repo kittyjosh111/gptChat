@@ -87,21 +87,6 @@ def save(value, key, filename):
   existing[key]=value #reassign old value to new VALUE
   return dict_write(filename, existing, 'w') #just overwrite, it's easier
 
-def bridge(ai_file, user_file):
-  """Higher order function responsible for bridging this script to AI_FILE and USER_FILE.
-  Contains an INNER function that takes in AI_TEXT or USER_TEXT, both of which are optional
-  If AI_TEXT is passed in, it writes that to AI_FILE
-  Then, if USER_TEXT is passed in, it writes that to USER_FILE
-  If nothing was passed in, it just returns AI_FILE and USER_FILE, respectively"""
-  def inner(ai_text=None, user_text=None):
-    if ai_text: #first check if we should write to AI_FILE
-      string_save(ai_file, ai_text)
-    if user_text: #then check if we should write to USER_FILE (unused for now)
-      string_save(user_file, user_text)
-    if not ai_text and not user_text: #else return AI_FILE and USER_FILE
-      return ai_file, user_file
-  return inner
-
 def api_request(model, convo):
   """Function to send an API request to OpenAI. Returns the API output string"""
   request=client.chat.completions.create(
@@ -169,7 +154,7 @@ def take_turns(model, convo, ai_name, filename, bridge_active=None, local_summar
       save(convo, 'convo', filename) #save for future use, also saves
       print(f'{ai_name}: ' + response + '\n') #print to console
       if bridge_active:
-        bridge(ai_file, user_file)(ai_text=response)
+        string_save(ai_file, response)
       return take_turns(model, convo, ai_name, filename, bridge_active, local_summary)('user') #returns control back to user for their turn
     elif who == "user":
       if len(dict_read(filename)['convo']) >= 32: #change to a suitable number

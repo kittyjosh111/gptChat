@@ -174,7 +174,8 @@ def take_turns(model, convo, ai_name, filename, bridge_active=None, local_summar
     elif who == "user":
       if len(dict_read(filename)['convo']) >= 32: #change to a suitable number
         summarize(model, ai_name, filename, convo, bridge_active, local_summary=local_summary) #then summarize without saving to garden
-      string_save(user_file, "") #finally, blank out the user_file again.
+      if bridge_active:
+        string_save(user_file, "") #finally, blank out the user_file again.
       def get_user_input(user_file=None):
         """Function to get input from a user or an external file"""
         if user_file:

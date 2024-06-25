@@ -23,35 +23,37 @@ Ren'Py bridging services for ```erma.py```
 
 8. Take a moment to look at your Ren'Py project folder. First look for ```launcher_services.py``` and ```script.rpy``` in the game/ folder. Now, inside the game/erma/ folder, you should see the following required files: ```erma.py```, ```sentiment.py```, and ```requirements.txt```. Other files are optional. You SHOULD NOT have the integrations folder in here.
 
-9. Take a moment to edit ```erma.py```. First, replace the line: ```client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))``` with this instead: ```client = OpenAI(base_url = 'http://localhost:11434/v1', api_key='ollama')```. If hosting the ollama server elsewhere, tweak base_url to your needs.
+9. Make a python venv as to not clog your system python with random dependencies. Put this inside the game/erma/ folder of the Ren'Py project. If you need an example command, you can run ```python3 -m venv venv``` to create the venv. Then activate it with ```source venv/bin/activate```. Make sure the venv is INSIDE /game/erma/, else Ren'Py might fail to detect the bridging files.
 
-10. Now uncomment the line ```ncb, ai_file, user_file = "neuralcloud_backup.ncb", 'neuralcloud_ai.file', 'neuralcloud_user.file'```. This should be near fourth to last line.
+10. Navigate to the game/erma/ folder of your RenPy project. In the venv from the previous step, install the requirements for ```erma.py``` with pip, using the ```requirements.txt```. For example, run ```pip install -r requirements.txt```.
 
-11. Then write the start function. MAKE SURE YOU SET BRIDGE_ACTIVE TO TRUE. As an example, you paste this function call into the last line of ```erma.py```: ```start('llama3', bridge_active=True, local_summary="philschmid/flan-t5-base-samsum")```. Replace llama3 with your model name. If you don't want to use the local_summary feature, remove that argument from inside the function call. Save changes and exit the file.
+11. Make sure that transformers is installed. Run ```pip install transformers```.
 
-12. Make a python venv as to not clog your system python with random dependencies. I suggest creating this inside the game/ folder of the Ren'Py project. Wherever you make it, remember the filepath because we will use it later to run ```erma.py``` or other scripts. If you need an example command, you can run ```python3 -m venv venv``` to create the venv. Then activate it with ```source venv/bin/activate```.
+12. Navigate to or create the game/images/ folder in the RenPy project.
 
-13. Navigate to the game/erma/ folder of your RenPy project. In the venv from the previous step, install the requirements for ```erma.py``` with pip, using the ```requirements.txt```. For example, run ```pip install -r requirements.txt```.
+13. Put in three images, one for positive, neutral, and negative emotions. Title them ```positive.png```, ```neutral.png```, and ```negative.png```, respectively.
 
-14. Make sure that transformers is installed. Run ```pip install transformers```.
-
-15. Navigate to or create the game/images/ folder in the RenPy project.
-
-16. Put in three images, one for positive, neutral, and negative emotions. Title them ```positive.png```, ```neutral.png```, and ```negative.png```, respectively.
-
-17. If you want, place a background image in the same folder and title it ```bg```. The file extension does not matter.
+14. If you want, place a background image in the same folder and title it ```bg```. The file extension does not matter.
 
 ## Setting up backends with or without sentiment analysis
 
-1. In a terminal window or however you usually run python files, activate the venv you created in step 12 from the installation.
+1. In a terminal window or however you usually run python files, activate the venv you created in step 9 from the installation.
 
-2. Navigate to and run ```erma.py``` in the game/erma/ folder of your Ren'Py project. For example, ```python3 game/erma/erma.py```. Follow the instructions as they appear. You are done when the console reports something like "Starting conversaton". Once this appears, feel free to close the script.
+2. Take a moment to edit ```erma.py```. First, replace the line: ```client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))``` with this instead: ```client = OpenAI(base_url = 'http://localhost:11434/v1', api_key='ollama')```. If hosting the ollama server elsewhere, tweak base_url to your needs.
 
-3. If you DO NOT want sentiment analysis, feel free to skip this step and move on to the section labeled "Running the Ren'Py project WITHOUT sentiment analysis". Otherwise, open another window and repeat step 1. Navigate to ```sentiment.py``` in the game/erma/ folder of your Ren'Py project. Run it and allow the model to download. Once the console reports something like "Waiting for ai input", feel free to close the script.
+3. Now uncomment the line ```ncb, ai_file, user_file = "neuralcloud_backup.ncb", 'neuralcloud_ai.file', 'neuralcloud_user.file'```. This should be near fourth to last line.
+
+4. Then write a start function. MAKE SURE YOU SET BRIDGE_ACTIVE TO **FALSE**. As an example, you paste this function call into the last line of ```erma.py```: ```start('llama3', bridge_active=False, local_summary="philschmid/flan-t5-base-samsum")```. Replace llama3 with your model name. If you don't want to use the local_summary feature, remove that argument from inside the function call. Save changes and exit the file.
+
+5. Navigate to and run ```erma.py``` in the game/erma/ folder of your Ren'Py project. For example, ```python3 game/erma/erma.py```. Follow the instructions as they appear. You are done when the console reports something like "Starting conversaton". Once this appears, feel free to close the script. Make sure that the bridge files appear in this folder.
+
+6. Then edit the start function. MAKE SURE YOU SET BRIDGE_ACTIVE TO **TRUE**. As an example, you paste this function call into the last line of ```erma.py```: ```start('llama3', bridge_active=True, local_summary="philschmid/flan-t5-base-samsum")```. Replace llama3 with your model name. If you don't want to use the local_summary feature, remove that argument from inside the function call. Save changes and exit the file.
+
+7. If you DO NOT want sentiment analysis, feel free to skip this step and move on to the section labeled "Running the Ren'Py project WITHOUT sentiment analysis". Otherwise, open another window and repeat step 1. Navigate to ```sentiment.py``` in the game/erma/ folder of your Ren'Py project. Run it and allow the model to download. Once the console reports something like "Waiting for ai input", feel free to close the script.
 
 ## Running the Ren'Py project with sentiment analysis
 
-1. Activate the python venv from step 12 of the installation. Then **in this venv**, launch the Ren'Py project. You can do this from CLI or GUI, whichever you are fluent in. If you launch it through CLI, you'll see debug messages for ```erma.py``` and ```sentiment.py```
+1. Activate the python venv from step 9 of the installation. Then **in this venv**, launch the Ren'Py project. You can do this from CLI or GUI, whichever you are fluent in. If you launch it through CLI, you'll see debug messages for ```erma.py``` and ```sentiment.py```
 
 2. Now you should be able to converse with the AI model through RenPy. To close it, press quit in the Main Menu or settings screen.
 
@@ -61,7 +63,7 @@ Ren'Py bridging services for ```erma.py```
 
 2. Go to the game/erma/ folder in the Ren'Py project directory. If ```sentiment``` is there, delete it.
 
-2. Activate the python venv from step 12 of the installation. Then **in this venv**, launch the Ren'Py project. You can do this from CLI or GUI, whichever you are fluent in. If you launch it through CLI, you'll see debug messages for ```erma.py```.
+2. Activate the python venv from step 9 of the installation. Then **in this venv**, launch the Ren'Py project. You can do this from CLI or GUI, whichever you are fluent in. If you launch it through CLI, you'll see debug messages for ```erma.py```.
 
 3. Now you should be able to converse with the AI model through RenPy. To close it, press quit in the Main Menu or settings screen.
 
@@ -69,7 +71,7 @@ Ren'Py bridging services for ```erma.py```
 
 1. Open up ```script.rpy``` in the game/ folder of the Ren'Py project. Comment out the line ```launcher_services.start()```. Save and exit.
 
-2. Open a terminal window. Activate the python venv from step 12 of the installation. Then **in this venv**, navigate to ```erma.py``` in the /game/erma/ folder. Launch it with something like ```python3 erma.py```. Do not close this window, it is the 'brains' of this project.
+2. Open a terminal window. Activate the python venv from step 9 of the installation. Then **in this venv**, navigate to ```erma.py``` in the /game/erma/ folder. Launch it with something like ```python3 erma.py```. Do not close this window, it is the 'brains' of this project.
 
 3. If you DO NOT want sentiment analysis, feel free to skip to the next step. Otherwise, open another window and repeat step 1-2. Navigate to ```sentiment.py``` in the game/erma/ folder of your Ren'Py project. Run it. Do not close this window, it is the 'heart' of this project.
 

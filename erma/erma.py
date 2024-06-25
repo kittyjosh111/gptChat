@@ -95,29 +95,28 @@ def api_request(model, convo):
   )
   return request.choices[0].message.content #return only the text of content
 
-def check_garden(input, filename, convo):
+def check_garden(input, filename, convo, garden):
   """Function that checks if a key from the summer garden
   has appeared in the INPUT passed in. Then loads in the garden value to CONVO.
   Note that INPUT should remain unedited, and only CONVO has been modified"""
-  memory=dict_read(filename) #load in the entire memory to look through garden
-  for each in list(memory['garden'].keys()): #iterate through the dict inside the garden
-    if each in input and str(memory['garden'][each]) not in str(convo): #if the key is in the INPUT passed in, AND not already in convo
-      convo.append({'role': 'assistant', 'content': memory['garden'][each] + f' These memories are tied to the word {each}.'}, ) #update convo
+  for each in list(garden.keys()): #iterate through the dict inside the garden
+    if each in input and str(garden[each]) not in str(convo): #if the key is in the INPUT passed in, AND not already in convo
+      convo.append({'role': 'assistant', 'content': garden[each] + f' These memories are tied to the word {each}.'}, ) #update convo
   save(convo, 'convo', filename) #now save the convo
   return input, convo #return the INPUT and the CONVO
 
-def summarize(model, ai_name, filename, convo, bridge_active, key=None, local_summary=False):
+def summarize(model, ai_name, filename, convo, garden, bridge_active, key=None, local_summary=False):
   """Function to summarize and compact the current Neural Cloud
   This saves token counts in the long run. Takes in AI_NAME, FILENAME, CONVO,
   and KEY (the key in the summer garden dict in a list"""
   print('> Neural Cloud compacting in progress. Please wait.')
   shutil.copy(ncb, 'backup.ncb.bk') #make a copy of the neural cloud in case we need to restore it
+  print('> Neural Cloud has been backed up. It is titled backup.ncb.bk')
   if bridge_active:
     string_save('summarize', "") #if bridge activated, create a temp summarize file to tell the integration to wait for user input
   messages='' #first create a blanked string
-  memory=dict_read(filename) #load in the entire memory to do stuff to
-  system_prompt=memory['convo'][0]['content'] #get the old system prompt
-  for each in memory['convo'][1:]: #then get the old convo values
+  system_prompt=convo[0]['content'] #get the old system prompt
+  for each in convo[1:]: #then get the old convo values
     role, content = each['role'], each['content']
     if role == 'assistant': #convert all 'assistant' to AI_NAME
       role=ai_name #reassign ROLE so that it prints the AI_NAME later
@@ -134,31 +133,30 @@ def summarize(model, ai_name, filename, convo, bridge_active, key=None, local_su
   save(convo, 'convo', filename) #now save the new convo
   if key: #now we do operations to update the summer garden
     print(f'> Saving to Summer Garden under the key: {key}.')
-    garden=memory['garden'] #get the summer garden list
     garden[key]=request #update the summer garden dict
     save(garden, 'garden', filename) #now save it to FILENAME
   print('> Neural Cloud compacting finished. You may continue the conversation.\n')
   if bridge_active: #summarize file only exists if BRIDGE_ACTIVE was in fact active
     os.remove('summarize') #remove the temp file
     string_save(user_file, "") #and blank out user_file for the next round
-  return take_turns(model, convo, ai_name, filename, bridge_active, local_summary)('user') #let AI do the summarization in background. That means user gets control next
+  return take_turns(model, convo, garden, ai_name, filename, bridge_active, local_summary)('user') #let AI do the summarization in background. That means user gets control next
 
-def take_turns(model, convo, ai_name, filename, bridge_active=None, local_summary=False):
+def take_turns(model, convo, garden, ai_name, filename, bridge_active=None, local_summary=False):
   """Higher order function that does things"""
   def inner(who, convo=convo, bridge_active=bridge_active):
     """Figure out whether to have the user or the AI given some result
     WHO should be the string 'api' or 'user' """
     if who == "api":
-      response, convo = check_garden(api_request(model, convo), filename, convo) #run a request, but first CHECK_GARDEN
+      response, convo = check_garden(api_request(model, convo), filename, convo, garden) #run a request, but first CHECK_GARDEN
       convo.append({'role': 'assistant', 'content': f'{response}'}, ) #append the return of API_REQUEST
       save(convo, 'convo', filename) #save for future use, also saves
       print(f'{ai_name}: ' + response + '\n') #print to console
       if bridge_active:
         string_save(ai_file, response)
-      return take_turns(model, convo, ai_name, filename, bridge_active, local_summary)('user') #returns control back to user for their turn
+      return take_turns(model, convo, garden, ai_name, filename, bridge_active, local_summary)('user') #returns control back to user for their turn
     elif who == "user":
-      if len(dict_read(filename)['convo']) >= 32: #change to a suitable number
-        summarize(model, ai_name, filename, convo, bridge_active, local_summary=local_summary) #then summarize without saving to garden
+      if len(convo) >= 32: #change to a suitable number
+        summarize(model, ai_name, filename, convo, garden, bridge_active, local_summary=local_summary) #then summarize without saving to garden
       if bridge_active:
         string_save(user_file, "") #finally, blank out the user_file again.
       def get_user_input(user_file=None):
@@ -172,7 +170,7 @@ def take_turns(model, convo, ai_name, filename, bridge_active=None, local_summar
         def action(input_command):
           """Takes in an INPUT function to run, then restarts take_turns with the user arg"""
           input_command #run the input command first
-          return take_turns(model, convo, ai_name, filename, bridge_active, local_summary)('user') #then rerun with user in control
+          return take_turns(model, convo, garden, ai_name, filename, bridge_active, local_summary)('user') #then rerun with user in control
         def matcher(regex1, regex2):
           """Function that tries to match USER_INPUT against a provided REGEX1.
           If there is a match, run the second REGEX2.
@@ -190,17 +188,17 @@ def take_turns(model, convo, ai_name, filename, bridge_active=None, local_summar
         elif user_input == 'help()':
           action(print('> These are the available commands. Type them without the quotation marks.\n>  "exit()": Exits the session.\n>  "clear()": Clears the console.\n>  "summarize()": Manually compact the neural cloud by summarizing past conversations. To save to the summer garden, put the key which you want to save to inside the parantheses. For example, summarize(key).\n'))
         elif (match_expression := matcher(r'summarize\([^)]*\)', r'\((.*?)\)')) is not False: #regex1 is summarize(*), regex2 is (*)
-          action(summarize(model, ai_name, filename, convo, bridge_active, match_expression, local_summary)) #input passed in, write to the summer garden
+          action(summarize(model, ai_name, filename, convo, garden, bridge_active, match_expression, local_summary)) #input passed in, write to the summer garden
         else:
           return user_input #if no commands found, just return user_input for further processing
       if bridge_active: #then see whether to look for a user_file or have the input
         toggle=user_file
       else:
         toggle=False
-      user_input, convo = check_garden(command_check(get_user_input(toggle)), filename, convo)
+      user_input, convo = check_garden(command_check(get_user_input(toggle)), filename, convo, garden)
       convo.append({'role': 'user', 'content': f'{user_input}'}, )
       #we don't save to file here. For example, if the person you're talking to doesnt hear you, they wont remember what you said
-      return take_turns(model, convo, ai_name, filename, bridge_active, local_summary)('api') #now return control back to the AI for their turn
+      return take_turns(model, convo, garden, ai_name, filename, bridge_active, local_summary)('api') #now return control back to the AI for their turn
     else:
       return '> Error. take_turns not called with correct inner function argument.'
   return inner
@@ -217,6 +215,7 @@ def start(model, bridge_active=False, local_summary=False):
     memory=dict_read(ncb) #memory set!
     ai_name=memory.get('ai_name') #set ai_name
     convo=memory.get('convo') #set convo
+    garden=memory.get('garden') #get the garden part of ncb now
     print(f'> Neural Cloud for {ai_name} loaded succesfully.')
   else: #if ncb not found, make and populate
     print('> Neural Cloud Backup not found. Creating...')
@@ -224,6 +223,7 @@ def start(model, bridge_active=False, local_summary=False):
     system_prompt=input('> Provide a system prompt for the AI. (This is akin to the personality or baseline traits for the AI)\n> ')
     convo=[{'role': 'system', 'content': f'{system_prompt} Your name is {ai_name}.'}, ]
     memory={'ai_name': ai_name, 'convo': convo, 'garden': {}} #memory set!
+    garden={} #the summer garden should be an empty dict
     dict_write(ncb, memory, 'w') #w indicates overwrite the file
     print(f'> Neural Cloud for {ai_name} created.')
   #now, we attempt to create files for the bridge functionality. If they exist, we just overwrite with a blank
@@ -236,7 +236,7 @@ def start(model, bridge_active=False, local_summary=False):
   if len(memory['convo']) >= 4: #system_prompt, summary, user, api makes 4 total items in the list. Only if we have this count can we give a sensible past convo
     print('User: ' + memory['convo'][-2]['content']) #user
     print(f'{ai_name}: ' + memory['convo'][-1]['content'] + '\n') #api
-  return take_turns(model=model, convo=convo, ai_name=ai_name, filename=ncb, bridge_active=bridge_active, local_summary=local_summary)('user') #ignition, starts a loop of user, api, user, api, etc...
+  return take_turns(model=model, convo=convo, garden=garden, ai_name=ai_name, filename=ncb, bridge_active=bridge_active, local_summary=local_summary)('user') #ignition, starts a loop of user, api, user, api, etc...
 
 ## Initiate the script. Modify as needed. ##
 #ncb, ai_file, user_file = "neuralcloud_backup.ncb", 'neuralcloud_ai.file', 'neuralcloud_user.file' #you MUST define these variables

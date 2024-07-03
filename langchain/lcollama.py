@@ -53,11 +53,15 @@ class NeuralCloud:
         self.chain = self.system_prompt | self.model_llm #this chains the prompt and model objects together
         if not self.memory: #if memory was blank...
             self.memory[self.name] = ChatMessageHistory() #...create a new memory
-            self.with_memory = RunnableWithMessageHistory(self.chain, lambda x: self.memory[x]) #basically, memory[config's session id], lambda returns message history
+        self.with_memory = RunnableWithMessageHistory(self.chain, lambda x: self.memory[x]) #basically, memory[config's session id], lambda returns message history
+
+    def list_memory(self):
+        """Returns the message/conversation history as a list"""
+        return self.memory[self.name].messages
 
     def api_request(self, user_input, bridge_active=False):
         """Ask langchain to generate an AIMessage given a HumanMessage with input USER_INPUT."""
-        print("User:", user_input)
+        #print("User:", user_input)
         response = self.with_memory.invoke([HumanMessage(content=user_input)], config=self.config).content
         pickle_write(ncb, [self.memory, self.system_prompt_string], 'wb')
         print(f"{self.name}:", response)
@@ -75,7 +79,10 @@ def loop(doll, bridge_active=False):
             user_input = wait_modified(user_file) #USER_FILE is written to (2/7)
         else:
             user_input = input("User: ")
-        doll.api_request(user_input, bridge_active) #passes contents of USER_FILE to the LLM API (3/7)
+        if user_input == "list_memory()":
+            print(doll.list_memory())
+        else:
+            doll.api_request(user_input, bridge_active) #passes contents of USER_FILE to the LLM API (3/7)
     return
 
 def start(model, bridge_active=False):
@@ -86,7 +93,7 @@ def start(model, bridge_active=False):
         memory=ncb_content[0] #memory set!
         ai_name=list(memory.keys())[0] #set ai_name
         system_prompt=ncb_content[1] #second item in list
-        doll=NeuralCloud(ai_name, model, system_prompt) #initiate the NeuralCloud class with this info
+        doll=NeuralCloud(ai_name, model, system_prompt, memory) #initiate the NeuralCloud class with this info
         print(f'> Neural Cloud for {ai_name} loaded succesfully.')
     else: #if ncb not found, make and populate
         print('> Neural Cloud Backup not found. Creating...')
@@ -102,4 +109,4 @@ def start(model, bridge_active=False):
     loop(doll, bridge_active) #ignition!
 
 ncb, ai_file, user_file = "neuralcloud_backup.ncb", 'neuralcloud_ai.file', 'neuralcloud_user.file' #you MUST define these variables
-start("qwen:0.5b", bridge_active=True)
+start("qwen:0.5b", bridge_active=False)

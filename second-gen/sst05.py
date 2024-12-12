@@ -241,5 +241,5 @@ def agent_initialize(filename, chat_model, n, k, embed_model, bridge_active=Fals
 # The fourth required arg is for the number of most related lines of dialogue EXCLUDING the above conditions to add into memory.
 # The fifth required arg is for the name of the ollama model for EMBEDDING GENERATION.
 
-agent_initialize("neuralcloud", "mistral", 5, 3, "nomic-embed-text")
-#agent_initialize("neuralcloud", "mistral", 5, 3, "nomic-embed-text", bridge_active=True, ai_file="ai_file", user_file="user_file", debug=True)
+#agent_initialize("neuralcloud", "mistral", 5, 3, "nomic-embed-text")
+agent_initialize("neuralcloud", "mistral", 5, 3, "nomic-embed-text", bridge_active=True, ai_file="ai_file", user_file="user_file", debug=True)

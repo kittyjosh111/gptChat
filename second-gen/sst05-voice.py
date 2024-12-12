@@ -41,7 +41,7 @@ def start(piper_model, ai_file):
       if ai_text: #make sure its not blank
         print("[sst05-voice.py] DEBUG: ai input found:", ai_text)
         piper_talk(ai_text, piper_model)
-    string_save(ai_file, "")
+    #string_save(ai_file, "") #might not be necessary for this script
 
 ## Initiate the script. Modify as needed. ##
 ## You will need to obtain a piper voice model. Look at their github for more info.

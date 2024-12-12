@@ -1,6 +1,7 @@
 import os
 import ollama
 import numpy as np
+import time
 from numpy.linalg import norm
 from datascience import *
 
@@ -76,6 +77,22 @@ def embed_from_csv(filename, embed_model):
 ### Agent functions ###
 #######################
 
+def string_save(filename, input):
+  """Function to save a string to a file.
+  Takes in an INPUT (string), and overwrites to FILENAME (string)"""
+  with open(filename, "w") as file:
+    file.write(input)
+
+def wait_modified(filename):
+  """Function that looks at the time at which a FILENAME (string) was last edited.
+  If that time changes, it means FILENAME was edited, and we return its new contents."""
+  last_modified=os.path.getmtime(filename)
+  while last_modified == os.path.getmtime(filename):
+    time.sleep(2.0) #adjust as necessary as to not burn out your processor
+  else:
+    with open(filename, "r") as read:
+      return read.read().rstrip() #rstrip removes the extra newline at the end
+
 def agent_creation():
   """Function to ask for agent specifics from the user. Returns that in a table"""
   ai_name=input('> What name would you like to assign to the AI? (This is what you will call the AI)\n> ')
@@ -121,31 +138,21 @@ def agent_load_memory(embed_table, user_input, n, k, embed_model):
   and the next K most similar lines of dialogue.
   
   Returns a list of the above to be passed to the ollama messages parameter."""
-  #ok, so first we remove the most recent line
-  filter_table = embed_table.take(np.arange(embed_table.num_rows - 1))
-  #then we remove the system prompt and name (first two lines)
-  filter_table = filter_table.take(np.arange(2, filter_table.num_rows))
-  #then we get the N most recent dialogues
-  if filter_table.num_rows - n <= 0:
-    recent_range = np.arange(filter_table.num_rows)
+  filter_table = embed_table.take(np.arange(embed_table.num_rows - 1)) #ok, so first we remove the most recent line
+  filter_table = filter_table.take(np.arange(2, filter_table.num_rows)) #then we remove the system prompt and name (first two lines)
+  if filter_table.num_rows - n <= 0: #then we get the N most recent dialogues, if theres enough entries
+    recent_range = np.arange(filter_table.num_rows) #otherwise just take everything
   else:
     recent_range = np.arange(filter_table.num_rows - n, filter_table.num_rows)
-  recent_mem = filter_table.take(recent_range)
-  #and remove them from the filtered
-  filter_table = filter_table.take(np.arange(filter_table.num_rows))
-  #now run the similarity test on whats left
-  sim_table = generate_sim_table(filter_table, user_input, embed_model)
-  #print("\n[DEBUG] Similarities Table")
-  #print(sim_table)
-  #print("\n---\n")
-  #and select the k most similar
-  if sim_table.num_rows >= k:
+  recent_mem = filter_table.take(recent_range) #and remove them from the filtered
+  filter_table = filter_table.take(np.arange(filter_table.num_rows)) #now run the similarity test on whats left
+  sim_table = generate_sim_table(filter_table, user_input, embed_model) #and select the k most similar
+  if sim_table.num_rows >= k: #similarly, check to see if we can even take K items
     k_nn_mem = sim_table.sort("Similarities", descending=True).take(np.arange(k))
   else:
     k_nn_mem = False
-  #now add k and n together
-  memory_list = []
-  if k_nn_mem:
+  memory_list = [] #now add k and n together
+  if k_nn_mem: 
     for k_index in np.arange(k_nn_mem.num_rows):
       memory_list.append(classify_speaker(k_nn_mem.take(k_index)))
   for n_index in np.arange(recent_mem.num_rows):
@@ -157,14 +164,17 @@ def agent_get_embeds(table, embed_model):
   TABLE from load_memory or other"""
   return generate_embed_table(table, embed_model)
 
-def user_turn(table, filename, embed_model):
+def user_turn(table, filename, embed_model, bridge_active, user_file):
   """Function to add user input to the embed table, then save"""
-  user_input = input("User: ")
+  if bridge_active and user_file:
+    user_input = wait_modified(user_file)
+  else:
+    user_input = input("User: ")
   new_table = update_embed_table(table, "User", user_input, embed_model)
   save_table(new_table, filename)
   return new_table, user_input
 
-def agent_turn(table, messages_list, filename, model, embed_model):
+def agent_turn(table, messages_list, filename, model, embed_model, bridge_active, ai_file, user_file):
   """Function to add agent input to the embed table, then save"""
   output = ollama.chat(
     model=model,
@@ -174,34 +184,39 @@ def agent_turn(table, messages_list, filename, model, embed_model):
   print(f"Assistant: {ai_input}")
   new_table = update_embed_table(table, "Assistant:", ai_input, embed_model)
   save_table(new_table, filename)
+  if bridge_active and user_file and ai_file:
+    string_save(ai_file, ai_input)
+    string_save(user_file, "")
   return new_table
 
-def user_agent_loop(table, filename, chat_model, n, k, embed_model):
+def user_agent_loop(table, filename, chat_model, n, k, embed_model, bridge_active, ai_file, user_file):
   """Loops the user and agent turns while ensuring they receive and return
   the correct and necessary stuff"""
   system_prompt = table.where("Speaker", "System").column("Contents").item(0)
   while True:
-    user_table, user_input = user_turn(table, filename, embed_model)
+    user_table, user_input = user_turn(table, filename, embed_model, bridge_active, user_file)
     memory_list = [{'role': 'system', 'content': f'{system_prompt}'}] #system prompt...
     for each in agent_load_memory(user_table, user_input, n, k, embed_model): #...memory...
       memory_list.append(each)
     memory_list.append({'role': 'user', 'content': f'{user_input}'}) #...and user inoput.
-    #print(f"[DEBUG] Memory size: {len(memory_list)}\n")
-    #print(memory_list)
-    #print("\n---\n")
-    table = agent_turn(user_table, memory_list, filename, chat_model, embed_model) #resets the table
+    table = agent_turn(user_table, memory_list, filename, chat_model, embed_model, bridge_active, ai_file, user_file) #resets the table
 
-def agent_initialize(filename, chat_model, n, k, embed_model):
+def agent_initialize(filename, chat_model, n, k, embed_model, bridge_active=False, ai_file=False, user_file=False):
   """Starts the conversation. Requires FILENAME to save the neural cloud to,
   CHAT_MODEL for the llm model used to generate text, N, for the number of recent
   messages to load into memory, K for the number of most similar messages to load into
   memory (does not include the k recent messages), and EMBED_MODEL for generation of
   embeddings."""
+  if bridge_active:
+    print(f'> Bridge service is active. AI responses will be written to {ai_file}, and User inputs should be placed in {user_file}.')
+    string_save(ai_file, "") #creates an empty file at AI_FILE
+    string_save(user_file, "") #and the same for USER_FILE
   embed_table = agent_get_embeds(agent_wakeup(filename), embed_model)
-  user_agent_loop(embed_table, filename, chat_model, n, k, embed_model)
+  user_agent_loop(embed_table, filename, chat_model, n, k, embed_model, bridge_active, ai_file, user_file)
 
 ############
 ### Main ###
 ############
 
 agent_initialize("neuralcloud", "qwen2.5:0.5b", 5, 3, "nomic-embed-text")
+#agent_initialize("neuralcloud", "qwen2.5:0.5b", 5, 3, "nomic-embed-text", bridge_active=True, ai_file="ai_file", user_file="user_file")

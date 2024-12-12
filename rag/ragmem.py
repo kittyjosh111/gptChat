@@ -218,5 +218,5 @@ def agent_initialize(filename, chat_model, n, k, embed_model, bridge_active=Fals
 ### Main ###
 ############
 
-agent_initialize("neuralcloud", "qwen2.5:0.5b", 5, 3, "nomic-embed-text")
-#agent_initialize("neuralcloud", "qwen2.5:0.5b", 5, 3, "nomic-embed-text", bridge_active=True, ai_file="ai_file", user_file="user_file")
+#agent_initialize("neuralcloud", "qwen2.5:0.5b", 5, 3, "nomic-embed-text")
+agent_initialize("neuralcloud", "qwen2.5:0.5b", 5, 3, "nomic-embed-text", bridge_active=True, ai_file="ai_file", user_file="user_file")

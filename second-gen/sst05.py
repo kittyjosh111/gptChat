@@ -25,15 +25,19 @@ from datascience import *
 def embed_generate(text, embed_model):
   """Function to generate an embedding for a TEXT"""
   """ EMBED_MODEL is meant to be defined as a Global Variable"""
-  return ollama.embeddings(model=embed_model, prompt=text)
+  return client.embeddings(model=embed_model, prompt=text)
 
-def generate_embed_table(table, embed_model):
+def generate_embed_table(table, embed_model, debug=False):
   """Embeddings generation. Takes in a TABLE and generates embeddings for each row, then
   appends those values in a new table with column Embeddings"""
   embeddings_array = make_array()
   for i in np.arange(table.num_rows):
+    if debug:
+      print(f"Generating embeds for row {i+1} out of {table.num_rows} rows of dialogue...")
     embedding = embed_generate(table.column("Contents").item(i), embed_model)
     embeddings_array = np.append(embeddings_array, embedding) #this saves us errors with nested arrays, but as a consequence, we cannot save embeddings to a file
+  if debug:
+    print("Embed table generated.")
   return table.with_columns("Embeddings", embeddings_array)
 
 def update_embed_table(table, speaker, text, embed_model):
@@ -80,11 +84,6 @@ def generate_sim_table(embed_table, prompt, embed_model):
   prompt_embedding = embed_generate(prompt, embed_model)
   similarity_scores = get_sims(prompt_embedding["embedding"], embed_table.column("Embeddings"))
   return embed_table.with_columns("Similarities", similarity_scores).sort("Similarities", descending=True)
-
-def embed_from_csv(filename, embed_model):
-  """Take in a FILENAME, then return an ebmed table generated from it."""
-  loaded_table = load_table(filename)
-  return generate_embed_table(loaded_table, embed_model) 
 
 #######################
 ### Agent functions ###
@@ -146,11 +145,6 @@ def classify_speaker(tbl_take):
   return {'role': this_role, 'content': f'{tbl_content}'}
 
 def agent_load_memory(embed_table, user_input, n, k, embed_model, debug):
-  """Function to load in memory from the neural cloud.
-  Retrieves the last N exchanges from the conversation,
-  and the next K most similar lines of dialogue.
-  
-  Returns a list of the above to be passed to the ollama messages parameter."""
   filter_table = embed_table.take(np.arange(embed_table.num_rows - 1)) #ok, so first we remove the most recent line
   filter_table = filter_table.take(np.arange(2, filter_table.num_rows)) #then we remove the system prompt and name (first two lines)
   if filter_table.num_rows - n <= 0: #then we get the N most recent dialogues, if theres enough entries
@@ -164,20 +158,37 @@ def agent_load_memory(embed_table, user_input, n, k, embed_model, debug):
     k_nn_mem = sim_table.sort("Similarities", descending=True).take(np.arange(k))
   else:
     k_nn_mem = False
+  system_prompted = embed_table.where("Speaker", "System").column(1).item(0) #we're going to stick K items into the system prompt
+  named = embed_table.where("Speaker", "Name").column(1).item(0) #extract this
   memory_list = [] #now add k and n together
-  if k_nn_mem: 
+  if k_nn_mem:
+    id_table = embed_table.with_columns("ID", np.arange(0, embed_table.num_rows)) # we need this for later
+    k_nn_mem = k_nn_mem.join("Contents", id_table).sort("ID") #and sort by time
     for k_index in np.arange(k_nn_mem.num_rows):
-      memory_list.append(classify_speaker(k_nn_mem.take(k_index)))
+      k_table_hold = k_nn_mem.take(k_index)
+      first_add = k_table_hold.column("Contents").item(0) #its either a User or Assistant dialogue
+      if first_add not in system_prompted:
+        if "User" in k_table_hold.column("Speaker").item(0): #if we pulled a user dialogue, we get the AI's next dialouge
+          next_dialogue = 1 #id of the ai response to user
+        elif "Assistant" in k_table_hold.column("Speaker").item(0): #otherwise we pull the AI and the user dialogue before it
+          next_dialogue = -1 #id of the user dialogue the AI was responding to
+        second_id = id_table.where("Contents", first_add).column("ID").item(0) + next_dialogue
+        second_add = id_table.where("ID", second_id).column("Contents").item(0)
+        if next_dialogue == 1:
+          system_prompted += f" User: {first_add}\n{named}: {second_add}"
+        elif next_dialogue == -1:
+          system_prompted += f" User: {second_add}\n{named}: {first_add}"
+    memory_list.append({'role': "system", 'content': f'{system_prompted}'})
   for n_index in np.arange(recent_mem.num_rows):
     memory_list.append(classify_speaker(recent_mem.take(n_index)))
   if debug:
     print(f"\n---\n[DEBUG]: Similarities Table\n{sim_table}")
   return memory_list
 
-def agent_get_embeds(table, embed_model):
+def agent_get_embeds(table, embed_model, debug=False):
   """Function to generate the embed table for the passed in
   TABLE from load_memory or other"""
-  return generate_embed_table(table, embed_model)
+  return generate_embed_table(table, embed_model, debug)
 
 def user_turn(table, filename, embed_model, bridge_active, user_file):
   """Function to add user input to the embed table, then save"""
@@ -191,7 +202,7 @@ def user_turn(table, filename, embed_model, bridge_active, user_file):
 
 def agent_turn(table, messages_list, filename, model, embed_model, bridge_active, ai_file, user_file):
   """Function to add agent input to the embed table, then save"""
-  output = ollama.chat(
+  output = client.chat(
     model=model,
     messages=messages_list
   )
@@ -210,7 +221,8 @@ def user_agent_loop(table, filename, chat_model, n, k, embed_model, bridge_activ
   system_prompt = table.where("Speaker", "System").column("Contents").item(0)
   while True:
     user_table, user_input = user_turn(table, filename, embed_model, bridge_active, user_file)
-    memory_list = [{'role': 'system', 'content': f'{system_prompt}'}] #system prompt...
+    #memory_list = [{'role': 'system', 'content': f'{system_prompt}'}] #system prompt...
+    memory_list = []
     for each in agent_load_memory(user_table, user_input, n, k, embed_model, debug): #...memory...
       memory_list.append(each)
     memory_list.append({'role': 'user', 'content': f'{user_input}'}) #...and user inoput.
@@ -228,7 +240,7 @@ def agent_initialize(filename, chat_model, n, k, embed_model, bridge_active=Fals
     print(f'> Bridge service is active. AI responses will be written to {ai_file}, and User inputs should be placed in {user_file}.')
     string_save(ai_file, "") #creates an empty file at AI_FILE
     string_save(user_file, "") #and the same for USER_FILE
-  embed_table = agent_get_embeds(agent_wakeup(filename), embed_model)
+  embed_table = agent_get_embeds(agent_wakeup(filename), embed_model, debug)
   user_agent_loop(embed_table, filename, chat_model, n, k, embed_model, bridge_active, ai_file, user_file, debug)
 
 ############
@@ -242,4 +254,4 @@ def agent_initialize(filename, chat_model, n, k, embed_model, bridge_active=Fals
 # The fifth required arg is for the name of the ollama model for EMBEDDING GENERATION.
 
 #agent_initialize("neuralcloud", "mistral", 5, 3, "nomic-embed-text")
-agent_initialize("neuralcloud", "mistral", 5, 3, "nomic-embed-text", bridge_active=True, ai_file="ai_file", user_file="user_file", debug=True)
+agent_initialize("neuralcloud", "llama3.2:1b", 10, 5, "nomic-embed-text", bridge_active=False, ai_file="ai_file", user_file="user_file", debug=True)

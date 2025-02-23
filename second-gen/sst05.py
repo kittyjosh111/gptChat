@@ -145,6 +145,14 @@ def classify_speaker(tbl_take):
   return {'role': this_role, 'content': f'{tbl_content}'}
 
 def agent_load_memory(embed_table, user_input, n, k, embed_model, debug):
+  """Function to load in memory from the neural cloud.
+  Retrieves the last N exchanges from the conversation,
+  and the next K most similar lines of dialogue.
+  The K most similar lines are ordered by time (recents last), and added in a way
+  such that user/ai exchange (two lines per each found related dialogue)
+  are added to the system prompt. So if the found related dialogue is from the user,
+  we add the AI response as well. If it was an AI response, we add the user query as well.
+  Returns a list of the above to be passed to the ollama messages parameter."""
   filter_table = embed_table.take(np.arange(embed_table.num_rows - 1)) #ok, so first we remove the most recent line
   filter_table = filter_table.take(np.arange(2, filter_table.num_rows)) #then we remove the system prompt and name (first two lines)
   if filter_table.num_rows - n <= 0: #then we get the N most recent dialogues, if theres enough entries

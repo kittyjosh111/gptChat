@@ -186,7 +186,7 @@ def agent_load_memory(embed_table, user_input, n, k, embed_model, debug):
           system_prompted += f" User: {first_add}\n{named}: {second_add}"
         elif next_dialogue == -1:
           system_prompted += f" User: {second_add}\n{named}: {first_add}"
-    memory_list.append({'role': "system", 'content': f'{system_prompted}'})
+  memory_list.append({'role': "system", 'content': f'{system_prompted}'})
   for n_index in np.arange(recent_mem.num_rows):
     memory_list.append(classify_speaker(recent_mem.take(n_index)))
   if debug:

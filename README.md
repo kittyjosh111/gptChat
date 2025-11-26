@@ -18,7 +18,9 @@ Refer to the individual folder READMEs for more specific instructions on how to 
 
 Refer to the folder names for the scripts described here.
 
-- ```erma```: The latest generation. Features a persistent memory, which summarizes itself, and also the ability to selectively save conersation summaries into a "garden" for recall later on. Erma was designed to be run either standalone in a terminal, or as a server with integration to other services, such as discord.
+- ```second-gen```: The latest generation of scripts. Stores all dialogue to a CSV file and uses embeddings + cosine similarity to identify related dialogue. Replaces the summarization feature from the legacy scripts and the "garden" from the erma script, yet maintains the ability to remember previous conversations and selectively load in relevant information. Designed to be run either standalone in a terminal, or as a server with integration to other services, such as discord or renpy.
+
+- ```erma```: Features a persistent memory, which summarizes itself, and also the ability to selectively save conersation summaries into a "garden" for recall later on. Erma was designed to be run either standalone in a terminal, or as a server with integration to other services, such as discord or renpy.
 
 - ```legacy```: The first generation of scripts. They are generally written poorly and not very efficient. They still do work but have not been updated for the most recent OpenAI pip module. Refer to the README in there for more details.
 

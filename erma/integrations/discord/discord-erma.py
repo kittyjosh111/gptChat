@@ -41,7 +41,7 @@ def start(discord_bot_token, triggers, ai_file, user_file):
                     send_message = "Model is summarizing. Please try again later."
                 string_save(ai_file, "") #otherwise, we first blank out the previous outputs...
                 print('User input received!')
-                string_save(user_file, message.content[len(i):].strip()) #...then write to USER_FILE, triggers ERMA to continue
+                string_save(user_file, message.content[len(triggers[i]):].strip()) #...then write to USER_FILE, triggers ERMA to continue
                 while send_message == "":
                     ai_read=string_read(ai_file) #store this first
                     if ai_read != "": #when ai_file is repopulated, that means AI has sent out its stuff

@@ -2,9 +2,7 @@
 
 ### Intro:
 
-Simple scripts to mimic a chat function using OpenAI's api and other fun things. Note that you will need an OpenAI API to run this. 
-
-Alternatively, if you have a local LLM backend that uses an OpenAI-compatible API (Ollama, LocalAI), then you can refer to their documentation to find out what minor tweaks you need in order to use these scripts with local LLM models.
+Simple scripts to set up an llm-powered chatbot. Though written with ollama in mind, you can modify the scripts to use your own llm api backend.
 
 ### General Setup:
 
@@ -26,10 +24,8 @@ Refer to the folder names for the scripts described here.
 
 ### Logic behind my scripts:
 
-The basic logic is that the scripts is that they query the api for a response based off of some sort of input. To retain "memory", these scripts will create two files to store previous conversations. This could be something like a ```neuralcloud_backup.ncb``` (ncb for **n**eural **c**loud **b**ackup). This ncb is basically the chatbot's memory, and logs user inputs, API responses, and the summer garden in Erma's case. **To reset the model "personality", remove the ncb file and other files created by the script.** This applies to all models.
+The basic logic behind the scripts is that they query the api for a response based off of some sort of input. To retain "memory", these scripts will create files to store previous conversations. This could be something like a ```neuralcloud_backup.ncb``` (ncb for **n**eural **c**loud **b**ackup). This ncb is basically the chatbot's memory, and logs user inputs, API responses, and the summer garden in Erma's case. **To reset the model "personality", remove the ncb file and other files created by the script.** This applies to all scripts.
 
 Again, refer to each individual README.md for more information.
 
 Note the neural cloud backup files are generally not cross-compatible between the scripts.
-
----

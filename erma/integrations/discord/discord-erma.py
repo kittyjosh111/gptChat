@@ -41,7 +41,7 @@ def start(discord_bot_token, triggers, ai_file, user_file):
                     send_message = "Model is summarizing. Please try again later."
                 string_save(ai_file, "") #otherwise, we first blank out the previous outputs...
                 print('User input received!')
-                string_save(user_file, message.content) #...then write to USER_FILE, triggers ERMA to continue
+                string_save(user_file, message.content[len(i):].strip()) #...then write to USER_FILE, triggers ERMA to continue
                 while send_message == "":
                     ai_read=string_read(ai_file) #store this first
                     if ai_read != "": #when ai_file is repopulated, that means AI has sent out its stuff
@@ -53,10 +53,10 @@ def start(discord_bot_token, triggers, ai_file, user_file):
                             print("Summarization in progress...")
                             send_message = "Model is summarizing. Please try again later." #stop, we don't want to interrupt it
                     time.sleep(2.0)
-                return await message.channel.send(send_message)
+                return await message.channel.send(send_message) #we should only get here if theres something to send
             else:
                 continue #we didnt get the triggers
     client.run(discord_bot_token)
 
 ## Initialize script using the template below. Change TRIGGERS as you want. ##
-#start(os.getenv('DISCORD_API_KEY'), ["hey gpt"], "neuralcloud_ai.file", "neuralcloud_user.file")
+#start(os.getenv('DISCORD_API_KEY'), ["hey gpt,"], "neuralcloud_ai.file", "neuralcloud_user.file")

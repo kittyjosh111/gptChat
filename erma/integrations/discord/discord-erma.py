@@ -34,24 +34,28 @@ def start(discord_bot_token, triggers, ai_file, user_file):
     async def on_message(message):
         if message.author == client.user or message.author.bot:
             return
+        send_message = ""
         for i in range(len(triggers)):
             if triggers[i].lower() in message.content.lower():
                 if os.path.isfile('summarize'): #if the model is summarizing, we don't want to interrupt it
-                    return await message.channel.send("Model is summarizing. Please try again later.")
+                    send_message = "Model is summarizing. Please try again later."
                 string_save(ai_file, "") #otherwise, we first blank out the previous outputs...
                 print('User input received!')
                 string_save(user_file, message.content) #...then write to USER_FILE, triggers ERMA to continue
-                while True:
+                while send_message == "":
                     ai_read=string_read(ai_file) #store this first
                     if ai_read != "": #when ai_file is repopulated, that means AI has sent out its stuff
                         print('AI response sent!')
                         string_save(ai_file, "") #now blank it
-                        return await message.channel.send(ai_read)
+                        send_message = ai_read
                     else: #AI is not ready to send out
                         if os.path.isfile('summarize'):
                             print("Summarization in progress...")
-                            return await message.channel.send("Model is summarizing. Please try again later.") #stop, we don't want to interrupt it
-                        time.sleep(2.0)
+                            send_message = "Model is summarizing. Please try again later." #stop, we don't want to interrupt it
+                    time.sleep(2.0)
+                return await message.channel.send(send_message)
+            else:
+                continue #we didnt get the triggers
     client.run(discord_bot_token)
 
 ## Initialize script using the template below. Change TRIGGERS as you want. ##
